@@ -3,13 +3,8 @@ name: CI
 on:
   push:
     branches: [ "main" ]
-    tags:
-      - "v*"
   pull_request:
     branches: [ "main" ]
-
-permissions:
-  contents: write
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -42,25 +37,3 @@ jobs:
 
       - name: Build
         run: msbuild Colors.Dev.sln /m /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
-
-      - name: Package
-        if: matrix.configuration == 'Release'
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path release | Out-Null
-          Copy-Item "${{ matrix.platform }}/${{ matrix.configuration }}/Colors.Dev.dll" -Destination release
-          Copy-Item "${{ matrix.platform }}/${{ matrix.configuration }}/Colors.Dev.lib" -Destination release
-          Copy-Item "*.h" -Destination release -ErrorAction SilentlyContinue
-
-      - name: Upload artifact
-        if: matrix.configuration == 'Release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Colors.Dev-${{ github.ref_name }}-${{ matrix.platform }}
-          path: release
-
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/') && matrix.configuration == 'Release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: release/*

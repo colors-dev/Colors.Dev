@@ -1,4 +1,4 @@
-name: CI
+name: Release
 
 on:
   push:
@@ -8,19 +8,9 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  build:
+  release:
     runs-on: windows-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        configuration: [Debug, Release]
-        platform: [x64]
 
     steps:
       - name: Checkout
@@ -35,29 +25,20 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore
-        run: msbuild Colors.Dev.sln /t:Restore /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
+        run: msbuild Colors.Dev.sln /t:Restore /p:Configuration=Release /p:Platform=x64
 
       - name: Build
-        run: msbuild Colors.Dev.sln /m /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
+        run: msbuild Colors.Dev.sln /m /p:Configuration=Release /p:Platform=x64
 
       - name: Package
-        if: matrix.configuration == 'Release'
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path release | Out-Null
-          Copy-Item "${{ matrix.platform }}/${{ matrix.configuration }}/Colors.Dev.dll" -Destination release
-          Copy-Item "${{ matrix.platform }}/${{ matrix.configuration }}/Colors.Dev.lib" -Destination release
+          Copy-Item "x64/Release/Colors.Dev.dll" -Destination release
+          Copy-Item "x64/Release/Colors.Dev.lib" -Destination release
           Copy-Item "*.h" -Destination release -ErrorAction SilentlyContinue
 
-      - name: Upload artifact
-        if: matrix.configuration == 'Release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Colors.Dev-${{ github.ref_name }}-${{ matrix.platform }}
-          path: release
-
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/') && matrix.configuration == 'Release'
         uses: softprops/action-gh-release@v2
         with:
           files: release/*
