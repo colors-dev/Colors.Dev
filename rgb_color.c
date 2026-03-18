@@ -16,14 +16,10 @@ COLORS_DEV_API char* RgbToRgbHex(RgbColor clr, unsigned int includeAlpha)
         snprintf(rgbHex, sizeof(rgbHex), "#%06X", (unsigned)RgbToRgbDec(clr));
 
     size_t len = strlen(rgbHex) + 1;
-    char* buffer = (char*)malloc((size_t)len);
-    if (!buffer) return NULL;
+    char* buffer = (char*)malloc(len);
 
-#ifdef _WIN32
-    strcpy_s(buffer, len, rgbHex);
-#else
-    memcpy(buffer, rgbHex, len);
-#endif
+    if(buffer)
+        memcpy(buffer, rgbHex, len);
 
     return buffer;
 }

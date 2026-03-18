@@ -190,7 +190,7 @@ namespace CSharpConsole
 
             try
             {
-                return Marshal.PtrToStringAnsi(p) ?? string.Empty;
+                return Marshal.PtrToStringUTF8(p) ?? string.Empty;
             }
             finally
             {
