@@ -247,16 +247,26 @@ ClearBuffer();
   * Converts RGB to decimal integer with alpha (0xAARRGGBB).
 
 * `LinearColor RgbToLinear(RgbColor clr)`
-  * Converts an RGB color to 32-bit linear color space.
+  * Converts an 8-bit per channel RgbColor (sRGB) into a high-precision (64-bit) LinearColor (Linear space). This is ideal for color math, blending, and lighting calculations to avoid gamma-related inaccuracies.
 
 * `RgbColor LinearToRgb(LinearColor lClr)`
-  * Converts a 32-bit linear color to RGB color space.
+  * Converts a high-precision (64-bit) LinearColor back into a standard 8-bit RgbColor (sRGB). This method applies the inverse sRGB gamma curve and clamps values to the 0-255 range for display.
 
 * `double SrgbToLinear(double srgb)`
-  * Converts a single channel from sRGB value to a single channel linear color value.
+  * Calculates the linear equivalent of a single sRGB channel. Input is expected to be a normalized value (0.0 to 1.0).
 
 * `double LinearToSrgb(double linear)`
-  * Converts a single channel from linear color value to a single channel sRGB color value.
+  * Calculates the sRGB equivalent of a single linear channel. Input is expected to be a normalized value (0.0 to 1.0).
+
+**Understanding Linear/NonLinear Curve**<br/>
+The sRGB curve is designed to mimic how human eyes perceive darkness, while the Linear curve is what physics (light) actually follows.  When performing color math, using Linear space prevents the inaccuracies that arise from the nonlinear sRGB encoding. After calculations, converting back to sRGB ensures the colors display correctly on screens.<br/>
+The conversion functions apply the standard sRGB gamma correction formula:
+- For sRGB to Linear: 
+  - if `srgb <= 0.04045`, then `linear = srgb / 12.92`
+  - if `srgb > 0.04045`, then `linear = pow((srgb + 0.055) / 1.055, 2.4)`
+- For Linear to sRGB:
+  - if `linear <= 0.0031308`, then `srgb = linear * 12.92`
+  - if `linear > 0.0031308`, then `srgb = 1.055 * pow(linear,(1/2.4)) - 0.055`
 
 ---
 
