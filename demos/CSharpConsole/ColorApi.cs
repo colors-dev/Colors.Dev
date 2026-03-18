@@ -10,6 +10,15 @@ internal struct RgbColor
 }
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct LinearColor
+{
+    public double alpha;
+    public double red;
+    public double green;
+    public double blue;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct HsvSpace
 {
     public double hue;
@@ -129,6 +138,14 @@ internal static class ColorApi
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern LabSpace RgbToLab(RgbColor rgb);
+
+    // -- Linear RGB Conversions ---
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern LinearColor RgbToLinear(RgbColor rgb);
+    
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern RgbColor LinearToRgb(LinearColor linear);
 
     // --- Lch Conversions ---
 
