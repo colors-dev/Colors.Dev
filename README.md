@@ -1,6 +1,6 @@
 # Colors.Dev
 
-[![Version](https://img.shields.io/badge/version-6.3.19.0100-blue.svg)](https://github.com/colors-dev/Colors.Dev)
+[![Version](https://img.shields.io/badge/version-6.3.19.0210-blue.svg)](https://github.com/colors-dev/Colors.Dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/colors-dev/Colors.Dev/blob/master/LICENSE.md)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-purple.svg)<br/>
 ![Dependencies](https://img.shields.io/badge/dependencies-none-purple)
@@ -298,6 +298,10 @@ ClearBuffer();
   * Calculates the contrast ratio between two RGB colors using their relative luminance values. This is commonly used for assessing text readability and accessibility.
   * **Returns**: The contrast ratio as a 64-bit floating-point number, where a higher value indicates greater contrast. The minimum recommended contrast ratio for normal text is 4.5:1.
 
+* `uint GetBestContrastColor(RgbColor bgColor)`
+  * Determines whether black or white text would provide better contrast against a given background color. This is useful for ensuring text readability and accessibility when dynamically setting console colors or designing user interfaces.
+  * **Returns**: A `uint` representing either black 0 or white 1 depending on which provides better contrast against the input background color.
+
 **Understanding Linear/NonLinear Curve**<br/>
 The sRGB curve is designed to mimic how human eyes perceive darkness, while the Linear curve is what physics (light) actually follows.  When performing color math, using Linear space prevents the inaccuracies that arise from the nonlinear sRGB encoding. After calculations, converting back to sRGB ensures the colors display correctly on screens.<br/>
 The conversion functions apply the standard sRGB gamma correction formula:
@@ -438,7 +442,10 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 ## Version History
 
-- **6.3.19.0100** - Current release
+- **6.3.19.0210** - Current release
+  - Added GetBestContrastColor() method to determine whether black or white text would provide better contrast against a given background color. This is useful for ensuring text readability and accessibility when dynamically setting console colors or designing user interfaces.
+
+- **6.3.19.0100**
   - Added methods, GetHue(), GetHsvSaturation(), GetHslSaturation(), GetHslLightness(), GetHsvBrightness(), GetRelativeLuminance(), GetPerceptualBrightness(), GetContrastRatio(). These methods provide additional color information and are useful for tasks like determining text contrast, performing color adjustments, and analyzing color properties for accessibility and design purposes.
 
 - **6.3.18.2120**
