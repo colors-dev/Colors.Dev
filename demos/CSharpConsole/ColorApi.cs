@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Runtime.InteropServices;
 
 [StructLayout(LayoutKind.Sequential)]
 internal struct RgbColor
@@ -229,4 +230,15 @@ internal static class ColorApi
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern double GetContrastRatio(RgbColor a, RgbColor b);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    private static extern uint GetBestContrastColor(RgbColor background);
+    public static Color GetIdealText(RgbColor bg)
+    {
+        uint argb = GetBestContrastColor(bg);
+        if ((int)argb == 0)
+            return Color.Black; //.FromArgb(255, 0, 0, 0);
+        else
+            return Color.White; //.FromArgb(255, 255, 255, 255);
+    }
 }

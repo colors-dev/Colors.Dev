@@ -13,7 +13,6 @@ extern "C" {
 #include "import_exports.h"
 #include "color_types.h"
 #include "white_points.h"       // For white point definitions used in XYZ to Lab conversions.
-#include <stdint.h>             // For uint32_t type
 
 /// <summary>
 /// Converts an RGB color to the Lab color space.<br/>
@@ -67,6 +66,13 @@ COLORS_DEV_API colors_dev_float64 GetPerceptualBrightness(RgbColor rgb);
 /// <param name="b">The second RGB color.</param>
 /// <returns>The contrast ratio between the two colors as a 64-bit floating-point value.</returns>
 COLORS_DEV_API colors_dev_float64 GetContrastRatio(RgbColor a, RgbColor b);
+
+/// <summary>
+/// Determines the ideal text color for optimal contrast against a given background color.
+/// </summary>
+/// <param name="background">The background color to evaluate for text contrast.</param>
+/// <returns>Returns 1 if White text is better, 0 if Black text is better.</returns>
+COLORS_DEV_API colors_dev_color32 GetBestContrastColor(RgbColor bgColor);
 
 // --- End of "extern C" block ---
 #ifdef __cplusplus
