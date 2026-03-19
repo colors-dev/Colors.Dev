@@ -119,7 +119,7 @@ namespace CSharpConsole
             sb.AppendLine($"{pad} - HSL Roundtrip -> RGB: (R:{hsl_rev.red}, G:{hsl_rev.green}, B:{hsl_rev.blue})");
             sb.AppendLine($"{pad} - CMYK Roundtrip -> RGB: (R:{hsl_rev.red}, G:{hsl_rev.green}, B:{hsl_rev.blue})");
 
-            WriteLines(clr, textClr, sb.ToString().Replace("\r", "").Split('\n'), 55);
+            WriteLines(clr, textClr, sb.ToString().Replace("\r", "").Split('\n'), 60);
         }
 
         static void ConsoleColorPrintDemo()
@@ -181,14 +181,18 @@ namespace CSharpConsole
                 WriteLine(rgbEmpty, fg, msg);
 
                 Console.ReadKey(true);
-                //set cursor back to start of message.
-                Console.CursorTop = curLoc[1];
-                Console.CursorLeft = curLoc[0];
-                //write message, but in black, overwriting and keeping CrLf that might exists.
-                WriteLine(rgbEmpty, rgbConsoleBlack, msg);
-                //set cursor back to start of message.
-                Console.CursorTop = curLoc[1];
-                Console.CursorLeft = curLoc[0];
+                try
+                {
+                    //set cursor back to start of message.
+                    Console.CursorTop = curLoc[1];
+                    Console.CursorLeft = curLoc[0];
+                    //write message, but in black, overwriting and keeping CrLf that might exists.
+                    WriteLine(rgbEmpty, rgbConsoleBlack, msg);
+                    //set cursor back to start of message.
+                    Console.CursorTop = curLoc[1];
+                    Console.CursorLeft = curLoc[0];
+                }
+                catch { /*On exit, Console.CursorTop/Left might not be available to set */ }
             }
         }
 
