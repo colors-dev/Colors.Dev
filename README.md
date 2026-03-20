@@ -23,7 +23,7 @@ A lightweight, cross-platform C/C++ library with .NET interop for color manipula
 
 ## Example Output
 
-<a href="https://raw.githubusercontent.com/colors-dev/Colors.Dev/refs/heads/main/thumbnail_examples.png"><img src="https://raw.githubusercontent.com/colors-dev/Colors.Dev/refs/heads/main/console_examples.png" alt="Console Example" width="420"/></a><a href="https://raw.githubusercontent.com/colors-dev/Colors.Dev/refs/heads/main/gemini_says.png"><img src="https://raw.githubusercontent.com/colors-dev/Colors.Dev/refs/heads/main/gemini_says.png" alt="What Gemini is saying" width="420"/></a><br/>
+<a href="https://raw.githubusercontent.com/colors-dev/Colors.Dev/refs/heads/main/console_examples.png"><img src="https://raw.githubusercontent.com/colors-dev/Colors.Dev/refs/heads/main/console_examples_min.png" alt="Console Example" width="360"/></a><a href="https://raw.githubusercontent.com/colors-dev/Colors.Dev/refs/heads/main/gemini_says.png"><img src="https://raw.githubusercontent.com/colors-dev/Colors.Dev/refs/heads/main/gemini_says.png" alt="What Gemini is saying" width="360"/></a><br/>
 
 ---
 

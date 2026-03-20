@@ -109,6 +109,9 @@
     <Image Include="console_examples.png">
       <Filter>docs</Filter>
     </Image>
+    <Image Include="console_examples_min.png">
+      <Filter>docs</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md">
