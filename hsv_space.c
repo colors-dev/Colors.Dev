@@ -2,24 +2,7 @@
 #include "hsv_space.h"
 #include "common.h"             // For clampDbl
 #include <math.h>               // For fmin, fmax, fabs, round, pow
-#include <string.h>             // For strlen, strcpy_s
-#include <stdio.h>              // Required for sprintf
-#include <objbase.h>            // For malloc
 // CIELAB, CIELCh, and CIELUV, and XYZ conversions.
-
-static char* CreateBuffer(const char* str) {
-    char retVal[25] = { 0 };
-
-    snprintf(retVal, sizeof(retVal), str);
-
-    size_t len = strlen(retVal) + 1;
-    char* buffer = (char*)malloc(len);
-
-    if (buffer)
-        memcpy(buffer, retVal, len);
-
-    return buffer;
-}
 
 COLORS_DEV_API RgbColor HsvToRgb(HsvSpace hsv)
 {
@@ -118,38 +101,38 @@ COLORS_DEV_API char* GetTone(RgbColor clr) {
     double s = hsv.saturation;
 
     // NEUTRALS (Top priority for desaturated colors)
-    if (s < 5.0 && v >= 95.0)  return CreateBuffer("Near White");
-    if (s < 20.0 && v > 85.0) return CreateBuffer("Light Neutral");
-    if (s < 20.0 && v > 55.0) return CreateBuffer("Mid Neutral");
-    if (s < 20.0 && v > 20.0) return CreateBuffer("Dark Neutral");
+    if (s < 5.0 && v >= 95.0)  return createBuffer("Near White");
+    if (s < 20.0 && v > 85.0) return createBuffer("Light Neutral");
+    if (s < 20.0 && v > 55.0) return createBuffer("Mid Neutral");
+    if (s < 20.0 && v > 20.0) return createBuffer("Dark Neutral");
 
     // VERY DARK (Value <= 20%) - Hue Weighted
-    if (v <= 5.0)  return CreateBuffer("Black");
-    if (v <= 10.0 && s < 20.0)  return CreateBuffer("Near Black");
+    if (v <= 5.0)  return createBuffer("Black");
+    if (v <= 10.0 && s < 20.0)  return createBuffer("Near Black");
     if (v <= 20.0) {
         double threshold = 20.0;
         if (h >= 45.0 && h <= 100.0) threshold = 25.0; // Yellow-Greens
         if (h >= 200.0 && h <= 280.0) threshold = 15.0; // Blues-Purples
 
-        return (s <= threshold) ? CreateBuffer("Neutral") : CreateBuffer("Very Dark");
+        return (s <= threshold) ? createBuffer("Neutral") : createBuffer("Very Dark");
     }
 
     // BRIGHTNESS BLOCKS (Remaining colors have s >= 20.0)
     if (v > 85.0) {
-        if (s > 75.0) return CreateBuffer("Vivid");
-        if (s >= 20.0) return CreateBuffer("Pastel");
-        return CreateBuffer("Bright");
+        if (s > 75.0) return createBuffer("Vivid");
+        if (s >= 20.0) return createBuffer("Pastel");
+        return createBuffer("Bright");
     }
 
     if (v > 55.0) {
-        if (s > 75.0) return CreateBuffer("Strong");
-        if (s >= 20.0) return CreateBuffer("Moderate");
-        return CreateBuffer("Muted Light");
+        if (s > 75.0) return createBuffer("Strong");
+        if (s >= 20.0) return createBuffer("Moderate");
+        return createBuffer("Muted Light");
     }
 
     // LOW BRIGHTNESS
-    if (s > 60.0) return CreateBuffer("Deep");
-    if (s >= 20.0) return CreateBuffer("Dull");
+    if (s > 60.0) return createBuffer("Deep");
+    if (s >= 20.0) return createBuffer("Dull");
 
-    return CreateBuffer("Washed Out"); // Accessible if top Neutral thresholds are ever adjusted
+    return createBuffer("Washed Out"); // Accessible if top Neutral thresholds are ever adjusted
 }

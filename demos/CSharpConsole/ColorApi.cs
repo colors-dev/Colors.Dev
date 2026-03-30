@@ -182,6 +182,22 @@ internal static class ColorApi
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern RgbColor CmykToRgb(CmykSpace rgb);
 
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern nint GetCmykMod(CmykSpace cmyk);
+    internal static string GetCmykModifier(CmykSpace cmyk)
+    {
+        nint p = GetCmykMod(cmyk);
+        try
+        {
+            if (p == 0) return string.Empty;
+            return Marshal.PtrToStringUTF8(p) ?? string.Empty;
+        }
+        finally
+        {
+            FreeAllocPtr(p);
+        }
+    }
+
     // --- Integer / Decimal Conversions ---
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]

@@ -27,6 +27,14 @@ COLORS_DEV_API CmykSpace RgbToCmyk(RgbColor clr);
 /// <returns>The converted RGB color.</returns>
 COLORS_DEV_API RgbColor CmykToRgb(CmykSpace cmyk);
 
+/// <summary>
+/// Gets the CMYK modification as a string representation.
+/// </summary>
+/// <param name="cmyk">The CMYK color space value to convert.</param>
+/// <returns>A pointer to a character string representing the CMYK modification.<br/>
+/// The caller is responsible for calling FreeAllocPtr to free memory.</returns>
+COLORS_DEV_API char* GetCmykMod(CmykSpace cmyk);
+
 // --- End of "extern C" block ---
 #ifdef __cplusplus
 }

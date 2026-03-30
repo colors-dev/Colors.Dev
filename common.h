@@ -4,6 +4,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <string.h>             // For strlen, strcpy_s
+#include <stdio.h>              // Required for sprintf
+#include <objbase.h>            // For malloc
+
 //#define TRUE 1
 //#define FALSE 0
 //#define BOOL int
@@ -15,6 +19,18 @@ static const double COLORS_LCH_CHROMA_EPS = 0.003;							// 1e-6 - A small epsil
 																			// Perceptual stability: treat near-neutral colors as neutral.
 																			// 0.003 clamps your observed D65Full gray drift (C=0.002).
 
+static inline char* createBuffer(const char* str) {
+	if (!str) return NULL;
+
+	size_t len = strlen(str) + 1;
+	char* buffer = (char*)malloc(len);
+
+	if (buffer) {
+		memcpy(buffer, str, len);
+	}
+
+	return buffer;
+}
 static inline unsigned char clampUChr(unsigned char v, unsigned char min, unsigned char max) { return v < min ? min : (v > max ? max : v); }
 static inline int clampInt(int v, int min, int max) { return v < min ? min : (v > max ? max : v); }
 static inline double clampDbl(double v, double min, double max) { return v < min ? min : (v > max ? max : v); }

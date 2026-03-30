@@ -11,8 +11,8 @@
 #define COLORS_DEV_FULL_YEAR 2026
 #define COLORS_DEV_YEAR_OFFSET 6
 #define COLORS_DEV_MONTH 3
-#define COLORS_DEV_DAY 20
-#define COLORS_DEV_UTC_TIME 1712
+#define COLORS_DEV_DAY 30
+#define COLORS_DEV_UTC_TIME 1333
 // This release number is incremented manually for each NuGet 
 // release, to distinguish between multiple releases on the 
 // same day and must be manually updated.
@@ -44,11 +44,11 @@
 #define COLORS_DEV_API COLORS_DEV_DLL
 
 #if defined(_WIN32) || defined(_WIN64)
-  #ifdef COLORS_DEV_EXPORTS
-    #define COLORS_DEV_DLL __declspec(dllexport)
-  #else
-    #define COLORS_DEV_DLL __declspec(dllimport)
-  #endif
+#ifdef COLORS_DEV_EXPORTS
+#define COLORS_DEV_DLL __declspec(dllexport)
 #else
-  #define COLORS_DEV_DLL __attribute__((visibility("default")))
+#define COLORS_DEV_DLL __declspec(dllimport)
+#endif
+#else
+#define COLORS_DEV_DLL __attribute__((visibility("default")))
 #endif
