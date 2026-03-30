@@ -136,3 +136,48 @@ COLORS_DEV_API char* GetTone(RgbColor clr) {
 
     return createBuffer("Washed Out"); // Accessible if top Neutral thresholds are ever adjusted
 }
+
+COLORS_DEV_API char* GetTemperature(RgbColor clr) {
+
+    // Using rgb instead of just hue, allows us to handle edge cases 
+    // like pure white (0 saturation) and near-neutral colors more effectively.
+    HsvSpace hsv = RgbToHsv(clr);
+    double h = hsv.hue;
+    double s = hsv.saturation;
+    double v = hsv.value;
+
+    // 1. GLOBAL NEUTRAL GUARDS (Top Priority)
+    if (v < 10.0) return createBuffer("Achromatic Dark");   // Too dark to see color
+    if (s < 2.0)  return createBuffer("Achromatic Light");  // Pure gray/silver
+    if (s < 8.0)  return createBuffer("Neutral");           // Near-neutral silver/ash
+
+    int isMuted = (s < 35.0);
+
+    // Normalize hue
+    while (h < 0) h += 360.0;
+    while (h >= 360.0) h -= 360.0;
+
+    // Hot: Red/Magenta wrap
+    if (h >= 315.0 || h < 15.0) return isMuted ? createBuffer("Muted Hot") : createBuffer("Hot");
+
+    // Warm: Orange/Yellow
+    if (h >= 15.0 && h < 75.0) return isMuted ? createBuffer("Muted Warm") : createBuffer("Warm");
+
+    // Neutral-Warm: Yellow-Green
+    if (h >= 75.0 && h < 105.0) return isMuted ? createBuffer("Muted Neutral-Warm") : createBuffer("Neutral-Warm");
+
+    // Neutral: Green
+    if (h >= 105.0 && h < 135.0) return isMuted ? createBuffer("Muted Neutral") : createBuffer("Neutral");
+
+    // Neutral-Cool: Cyan-Green
+    if (h >= 135.0 && h < 165.0) return isMuted ? createBuffer("Muted Neutral-Cool") : createBuffer("Neutral-Cool");
+
+    // Cool: Cyan/Blue-Cyan
+    if (h >= 165.0 && h < 225.0) return isMuted ? createBuffer("Muted Cool") : createBuffer("Cool");
+
+    // Cold: Blue/Violet
+    if (h >= 225.0 && h < 285.0) return isMuted ? createBuffer("Muted Cold") : createBuffer("Cold");
+
+    // Fallback: Magenta bridge
+    return isMuted ? createBuffer("Muted Neutral-Warm") : createBuffer("Neutral-Warm");
+}

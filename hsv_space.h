@@ -62,6 +62,13 @@ COLORS_DEV_API colors_dev_float64 GetHsvBrightness(RgbColor rgb);
 /// <returns>A string describing the tone of the color.</returns>
 COLORS_DEV_API char* GetTone(RgbColor clr);
 
+/// <summary>
+/// Gets the temperature classification of an RGB color.
+/// </summary>
+/// <param name="clr">The RGB color to analyze.</param>
+/// <returns>A string representing the 16 temperature classifications of the color (e.g., 'warm', 'cool').</returns>
+COLORS_DEV_API char* GetTemperature(RgbColor clr);
+
 // --- End of "extern C" block ---
 #ifdef __cplusplus
 }

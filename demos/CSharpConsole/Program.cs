@@ -95,6 +95,7 @@ namespace CSharpConsole
             var suggestTextClr = GetIdealTextColor(clr);
             var colorTone = GetColorTone(clr);
             var cmykModifier = GetCmykModifier(cmyk);
+            var colorTemp = GetColorTemp(clr);
 
             sb.AppendLine($"{pad} --- Testing {title} - {hex} Conversions ---");
 
@@ -113,6 +114,8 @@ namespace CSharpConsole
             sb.AppendLine($"{pad} - ContrastRatio: {ratio:0.00} - {((ratio < 4.5)?"Alert":"Good")}");
             sb.AppendLine($"{pad} - Suggested Text Color: {suggestTextClr}");
             sb.AppendLine($"{pad} - Tone: {colorTone}");
+            sb.AppendLine($"{pad} - Temperature: {colorTemp}"); 
+            
             sb.AppendLine($"{pad} - HEX8: {ahex}, Dec: {aDec}");
             sb.AppendLine($"{pad} - HEX6: {hex},   Dec: {dec}");
 

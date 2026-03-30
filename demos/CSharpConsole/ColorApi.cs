@@ -127,6 +127,23 @@ internal static class ColorApi
         }
     }
 
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern nint GetTemperature(RgbColor rgb);
+    internal static string GetColorTemp(RgbColor rgb)
+    {
+        nint p = GetTemperature(rgb);
+        try
+        {
+            //p = GetTone(rgb);
+            if (p == 0) return string.Empty;
+            return Marshal.PtrToStringUTF8(p) ?? string.Empty;
+        }
+        finally
+        {
+            FreeAllocPtr(p);
+        }
+    }
+
     // --- HSL Conversions ---
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]

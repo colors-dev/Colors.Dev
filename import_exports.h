@@ -12,7 +12,7 @@
 #define COLORS_DEV_YEAR_OFFSET 6
 #define COLORS_DEV_MONTH 3
 #define COLORS_DEV_DAY 30
-#define COLORS_DEV_UTC_TIME 1352
+#define COLORS_DEV_UTC_TIME 1527
 // This release number is incremented manually for each NuGet 
 // release, to distinguish between multiple releases on the 
 // same day and must be manually updated.

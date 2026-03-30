@@ -1,6 +1,6 @@
 # Colors.Dev
 
-[![Version](https://img.shields.io/badge/version-6.3.30.1352-blue.svg)](https://github.com/colors-dev/Colors.Dev)
+[![Version](https://img.shields.io/badge/version-6.3.30.1527-blue.svg)](https://github.com/colors-dev/Colors.Dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/colors-dev/Colors.Dev/blob/master/LICENSE.md)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-purple.svg)<br/>
 ![Dependencies](https://img.shields.io/badge/dependencies-none-purple)
@@ -13,7 +13,7 @@ A lightweight, cross-platform C/C++ library with .NET interop for color manipula
 ## Features (the items with strikethough are planned but not yet implemented)
 
 - **Color Space Conversions**: Convert between RGB, HSV, HSL, CMYK, XYZ, Lab, Lch, Luv, sRGB, and Linear color spaces.
-- **Color Characteristics**: Tone, ~~Temperature~~, Brightness, Luminance, Contrast Ratio, and more.
+- **Color Characteristics**: Tone, Temperature, Brightness, Luminance, Contrast Ratio, and more.
 - **Color Relationships**: ~~Complementary~~, ~~Analogous~~, ~~Triadic~~, ~~Tetradic~~ color generation.
 - **Color Representation**: CMYK Modifiers, Hex and Decimal format conversions.
 - **Console Color Support**: Set 24-bit true colors for foreground and background in console applications
@@ -251,9 +251,14 @@ ClearBuffer();
   * **Returns**: A string literal representing the tone category of the color.
   * **Note**: Caller must free the returned string with `FreeAllocPtr()`.
 
+* `char* GetTemperature(RgbColor rgb)`
+  * Determines the color temperature category (e.g., "Warm", "Cool", "Neutral") of an RGB color based on its hue and saturation. This can be useful for design decisions, such as choosing complementary colors or setting a mood.
+  * **Returns**: A string literal representing the temperature category of the color.
+  * **Note**: Caller must free the returned string with `FreeAllocPtr()`. 
+
 * `void FreeAllocPtr(void* p)`
-  * Only required after calls to RgbToRgbHex(), GetTone(), and GetCmykMod().
-  * Frees memory allocated by the library for returned pointers (e.g. hex strings, CMYK modifiers).
+  * Only required after calls to RgbToRgbHex(), GetTone(), GetCmykMod(), and GetTemperature().
+  * Frees memory allocated by the library for returned pointers (e.g. hex strings, CMYK modifiers, temperature strings).
 
 * `int RgbToRgbDec(RgbColor clr)`
   * Converts RGB to decimal integer format (0xRRGGBB).
@@ -269,7 +274,7 @@ ClearBuffer();
 * `RgbColor LinearToRgb(LinearColor lClr)`
   * Converts a high-precision (64-bit) LinearColor back into a standard 8-bit RgbColor (sRGB). This method applies the inverse sRGB gamma curve and clamps values to the 0-255 range for display.
   * This is typically used after performing color math in linear space to convert the results back to sRGB for display on screens, which expect nonlinear sRGB values.
-  * **Returns**: An `RgbColor` structure with 8-bit RGB values suitable
+  * **Returns**: An `RgbColor` structure with 8-bit RGB values suitable for display.
 
 * `double SrgbToLinear(double srgb)`
   * Calculates the linear equivalent of a single sRGB channel. Input is expected to be a normalized value (0.0 to 1.0).
@@ -480,7 +485,10 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 ## Version History
 
-- **6.3.30.1352**  - Current release
+- **6.3.30.1527**  - Current release
+  - Added GetTemperature() method to determine the color temperature category (e.g., "Warm", "Cool", "Neutral") of an RGB color based on its hue and saturation. This can be useful for design decisions, such as choosing complementary colors or setting a mood. The method uses hue and saturation thresholds to classify colors into temperature categories, providing developers with a simple way to understand and utilize the temperature characteristics of a color in their applications.
+
+- **6.3.30.1352**
   - Added GetCmykMod() method to generate a CMYK modifier string based on the cyan, magenta, yellow, and black components of a CmykSpace structure. This function is useful for creating descriptive labels or modifiers that represent the CMYK values of a color, which can be used in design applications, printing workflows, or any context where CMYK color information is relevant. The method dynamically constructs a string that includes the CMYK values in a readable format, making it easier for developers to understand and utilize the CMYK information associated with a color.
 
 - **6.3.20.1712**
