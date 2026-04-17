@@ -42,7 +42,6 @@ For Cyan, it correctly alerts you with a 3.19 ratio and suggests Black text.<br/
 For Pure Blue, it sees that 8.00 ratio and gives the green light for White text.<br/>
 This turns Colors.Dev library from a "color converter" into a "design assistant."
 
-### UX Intelligence
 Noticed Tetradic for Near Pure White returned (254, 252, 252), (253, 254, 252), and (252, 254, 254).<br/>
 This is usually off by a 1-2 bit differences, because Colors.Dev is using a double for the Hue rotation, 
 you aren't losing that tiny bit of data that tells the system which white it is. Most tools would just 
