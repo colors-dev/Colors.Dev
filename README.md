@@ -10,7 +10,7 @@ A lightweight, cross-platform C/C++ library with .NET interop for color manipula
 
 ---
 
-## Features (the items with strikethough are planned but not yet implemented)
+## Features
 
 - **Color Space Conversions**: Convert between RGB, HSV, HSL, CMYK, XYZ, Lab, Lch, Luv, sRGB, and Linear color spaces.
 - **Color Characteristics**: Tone, Temperature, Brightness, Luminance, Contrast Ratio, and more.
