@@ -83,14 +83,14 @@ return (255, 255, 255) for all of them and lose the harmony entirely.
 
 ### Prerequisites
 
-- **Windows**: Visual Studio 2022 (Platform Toolset v143)
+- **Windows**: Visual Studio 2026 (Platform Toolset v145)
 - **C++ Standard**: C++14 or higher
 - **.NET SDK**: .NET 8.0 (for C# demos)
 
 ### Building the Library
 
 1. Clone the repository:
-2. Open `Colors.Dev.sln` in Visual Studio 2022
+2. Open `Colors.Dev.sln` in Visual Studio 2026
 3. Build the solution (F7)
 4. The DLL will be output to the `bin` directory
 
@@ -475,7 +475,7 @@ ColorApi.ClearBuffer();
 
 ## Building
 
-### Visual Studio 2022
+### Visual Studio 2026
 
 1. Open `Colors.Dev.sln`
 2. Select desired configuration (Debug/Release)
