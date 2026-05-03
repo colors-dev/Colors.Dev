@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.ConstrainedExecution;
+﻿using Chizl.ConsoleSupport;
 using System.Text;
 using static ColorApi;
 
@@ -10,7 +9,6 @@ namespace CSharpConsole
         const string welcomeToDemo = " Welcome to the .NET Console Color Demo! ";
         // column min width, this is adding the column number at the start of each line with padding.
         const int _columnMinWidth = 64;
-        const int _newRowOnGroup = 2;
 
         // some stress test colors, and some common ones.
         static readonly RgbColor rgbNearPureBlack = new RgbColor { alpha = 255, red = 1, green = 3, blue = 2 };
@@ -22,6 +20,7 @@ namespace CSharpConsole
 
         static readonly RgbColor rgbEmpty = new RgbColor { alpha = 0, red = 0, green = 0, blue = 0 };
         static readonly RgbColor rgbRed = new RgbColor { alpha = 255, red = 255, green = 0, blue = 0 };
+        static readonly RgbColor rgbBlue = new RgbColor { alpha = 255, red = 0, green = 0, blue = 255 };
         static readonly RgbColor rgbViolet = new RgbColor { alpha = 255, red = 127, green = 0, blue = 255 };
         static readonly RgbColor rgbYellow = new RgbColor { alpha = 255, red = 255, green = 255, blue = 0 };
         static readonly RgbColor rgbCyan = new RgbColor { alpha = 255, red = 0, green = 255, blue = 255 };
@@ -31,18 +30,19 @@ namespace CSharpConsole
         static readonly RgbColor rgbConsoleBlack = new RgbColor { alpha = 255, red = 12, green = 12, blue = 12 };
 
         static readonly (RgbColor bgColor, RgbColor fgColor, string title)[] _listOfColors = {
-           (rgbNearPureBlack, rgbWhite, "Near Pure Black"),
-           (rgbSmokyTaupe, rgbBlack, "Smoky Taupe"),
-           (rgbNearPureWhite, rgbBlack, "Near Pure White"),
-           (rgbDeepNavy, rgbWhite, "Deep Navy"),
-           (rgbAshRose, rgbWhite, "Ash Rose"),
            (rgbOrange, rgbBlack, "Pure Orange"),
+           (rgbBlue, rgbWhite, "Pure Blue"),
            (rgbViolet, rgbWhite, "Violet"),
            (rgbCyan, rgbBlack, "Cyan"),
+           (rgbAshRose, rgbWhite, "Ash Rose"),
+           (rgbNearPureBlack, rgbWhite, "Near Pure Black"),
+           (rgbDeepNavy, rgbWhite, "Deep Navy"),
+           (rgbNearPureWhite, rgbBlack, "Near Pure White")
         };
 
         static void Main(string[] args)
         {
+            VT.Enable();
             AnyKey("This console buffer will be clear on any key being pressed.", rgbCyan);
             ClearBuffer();
 
@@ -73,9 +73,6 @@ namespace CSharpConsole
             (int row, int col) setRowCol = (0, 0);
             (int row, int col) lastRowCol = (0, 0);
 
-            int bottomRow = 0;
-            var thisGroup = -1;
-
             var maxBufferHeight = _listOfColors.Length * 60;
 
             if (Console.BufferWidth < 240)
@@ -92,27 +89,10 @@ namespace CSharpConsole
             }
 
             foreach (var (bgColor, fgColor, title) in _listOfColors)
-            {
-                thisGroup++;
-                if (thisGroup != 0 && (thisGroup % _newRowOnGroup) == 0)
-                {
-                    setRowCol.col = 0;
-                    setRowCol.row = lastRowCol.row;
-                }
-                else if (thisGroup != 0)
-                {
-                    if (lastRowCol.col != 0)
-                        setRowCol.col = lastRowCol.col - 1;
-                }
-
-                lastRowCol = ShowColorInfo(bgColor, fgColor, title, setRowCol.row, setRowCol.col);
-                bottomRow = Math.Max(bottomRow, lastRowCol.row);
-            }
-
-            Console.SetCursorPosition(0, bottomRow + 2);
+                ShowColorInfo(bgColor, fgColor, title);
         }
 
-        static (int lastRow, int lastCol) ShowColorInfo(RgbColor clr, RgbColor textClr, string title, int row = -1, int col = -1)
+        static void ShowColorInfo(RgbColor clr, RgbColor textClr, string title)
         {
             var pad = " ";
             var sb = new StringBuilder();
@@ -189,8 +169,7 @@ namespace CSharpConsole
             var allLines = sb.ToString().Replace("\r", "").Split('\n');
             var width = GetWidth(allLines, _columnMinWidth, 1);
 
-            WriteLines(clr, textClr, sb.ToString().Replace("\r", "").Split('\n'), width, col, row);
-            return (row + allLines.Length, col + width + 1);
+            WriteLines(clr, textClr, sb.ToString().Replace("\r", "").Split('\n'), width);
         }
 
         static void CreateString(string baseStr, RgbColor[] colors, ref StringBuilder sb)
@@ -240,39 +219,25 @@ namespace CSharpConsole
         static void WriteLine(RgbColor bg, RgbColor fg, string msg, params object[] args)
             => PrintWithColor(bg, fg, string.Format($"{msg}\n", args));
 
-        static int WriteLines(RgbColor bg, RgbColor fg, string[] msgs, int minWidth = 0, int col = -1, int row = -1)
+        static int WriteLines(RgbColor bg, RgbColor fg, string[] msgs, int minWidth = 0)
         {
-            var staticName = "Colors.Dev ";
-            var maxLen = GetWidth(msgs, minWidth, 1);
-            string newMsg = string.Empty;
+            var maxLen = 0;
+            foreach (var msg in msgs)
+                maxLen = Math.Max(maxLen, msg.Length);
+
+            maxLen++;   // add space to end            
+            if (maxLen < minWidth)
+                maxLen = minWidth;
 
             foreach (var msg in msgs)
             {
-                newMsg = msg + new string(' ', maxLen - msg.Length);
-                PrintWithColor(bg, fg, newMsg, col, row);
+                var newMsg = msg + new string(' ', maxLen - msg.Length);
+                PrintWithColor(bg, fg, newMsg);
                 if (msgs.Length > 1)
-                    row++;
-            }
-
-            if (msgs.Length > 1)
-            {
-                newMsg = $"{new string(' ', maxLen - (staticName.Length + 1))}{staticName} ";
-                PrintWithColor(bg, fg, newMsg, col, row - 1);
+                    Console.WriteLine();
             }
 
             return maxLen;
-        }
-
-        static void PrintWithColor(RgbColor bg, RgbColor fg, string msg, int col = -1, int row = -1)
-        {
-            try
-            {
-                Console.SetCursorPosition(col, row);
-            } catch(Exception ex) {
-                Debug.WriteLine(ex.Message);
-            }
-
-            PrintWithColor(bg, fg, msg);
         }
 
         static void PrintWithColor(RgbColor bg, RgbColor fg, string msg)
