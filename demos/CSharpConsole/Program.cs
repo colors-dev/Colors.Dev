@@ -70,8 +70,8 @@ namespace CSharpConsole
         {
             ClearBuffer();
 
-            (int row, int col) setRowCol = (0, 0);
-            (int row, int col) lastRowCol = (0, 0);
+            //(int row, int col) setRowCol = (0, 0);
+            //(int row, int col) lastRowCol = (0, 0);
 
             var maxBufferHeight = _listOfColors.Length * 60;
 

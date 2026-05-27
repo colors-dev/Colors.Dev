@@ -89,10 +89,12 @@ return (255, 255, 255) for all of them and lose the harmony entirely.
 
 ### Building the Library
 
-1. Clone the repository:
-2. Open `Colors.Dev.sln` in Visual Studio 2026
-3. Build the solution (F7)
-4. The DLL will be output to the `bin` directory
+- Clone the repository
+    ```bash
+    git clone https://github.com/colors-dev/Colors.Dev.git
+    ```
+
+Please visit the detailed [BUILD.md](BUILD.md) for cross platform build instructions.
 
 ### Build Output
 

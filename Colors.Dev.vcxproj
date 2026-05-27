@@ -51,9 +51,11 @@
     <Image Include="console_examples_min2.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BUILD.md" />
     <None Include="Colors.Dev.nuspec" />
     <None Include="Colors.Dev.targets" />
     <None Include="LICENSE.md" />
+    <None Include="Makefile" />
     <None Include="pack-and-publish.ps1" />
     <None Include="README.md" />
     <None Include="update_version.ps1" />

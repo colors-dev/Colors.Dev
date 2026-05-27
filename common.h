@@ -6,7 +6,8 @@
 
 #include <string.h>             // For strlen, strcpy_s
 #include <stdio.h>              // Required for sprintf
-#include <objbase.h>            // For malloc
+//#include <objbase.h>          // For malloc - Windows specific, but we can use standard malloc instead for cross-platform compatibility.
+#include <stdlib.h>             // For malloc, free
 
 //#define TRUE 1
 //#define FALSE 0

@@ -129,6 +129,8 @@
     <None Include="Colors.Dev.nuspec" />
     <None Include="Colors.Dev.targets" />
     <None Include="pack-and-publish.ps1" />
+    <None Include="Makefile" />
+    <None Include="BUILD.md" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="version.rc">
