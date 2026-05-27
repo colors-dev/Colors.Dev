@@ -555,7 +555,10 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 ## Version History
 
-- **6.4.18.2248** - Current release
+- **6.5.27.1943** - Current release
+  - **Update**: Added a `Build.md` file with detailed build instructions for Visual Studio 2026 and cross-platform builds using CMake. This provides developers with clear guidance on how to compile the library and demos in various environments, ensuring easier adoption and contribution to the project.  Also updated a couple of headers using Windows-specific includes, replacing them with cross-platform alternatives.
+
+- **6.4.18.2248**
   - **Update**: CMYK Modifiers to better reflect the actual CMYK values of the color, rather than a simplified "Cxx Mxx Yxx Kxx" format.  The new format is "C:xx% M:xx% Y:xx% K:xx%" which provides a clearer and more accurate representation of the CMYK components for design and printing applications.
   - **Testing**: Using stress colors used and responses:
     |Color Name|RGB Value|Colors.Dev CMYK Modifier|
