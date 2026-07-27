@@ -88,7 +88,7 @@ COLORS_DEV_API char* GetCmykMod(CmykSpace cmyk)
     // 3. Vivids 
     if (c > 85.0 && m < 40.0 && y < 40.0) sprintf_s(modifier, sizeof(modifier), "Vivid Cyan");
     else if (m > 85.0 && c < 60.0 && y < 40.0) sprintf_s(modifier, sizeof(modifier), "Vivid Magenta");
-    else if (c > 85.0 && m < 40.0 && y < 40.0) sprintf_s(modifier, sizeof(modifier), "Vivid Navy");
+    else if (c > 85.0 && m < 50.0 && y < 40.0) sprintf_s(modifier, sizeof(modifier), "Vivid Navy");
     else if (y > 85.0 && c < 40.0 && m < 40.0) sprintf_s(modifier, sizeof(modifier), "Vivid Yellow");
 
     // 4. Strong single CMY

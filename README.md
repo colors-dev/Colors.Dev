@@ -1,6 +1,6 @@
 # Colors.Dev
 
-[![Version](https://img.shields.io/badge/version-6.4.18.2248-blue.svg)](https://github.com/colors-dev/Colors.Dev)
+[![Version](https://img.shields.io/badge/version-6.7.27.0357-blue.svg)](https://github.com/colors-dev/Colors.Dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/colors-dev/Colors.Dev/blob/master/LICENSE.md)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-purple.svg)<br/>
 ![Dependencies](https://img.shields.io/badge/dependencies-none-purple)
@@ -555,20 +555,23 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 ## Version History
 
-- **6.5.27.1943** - Current release
+- **6.7.27.0357** - Current release
+  - **Update**: Comment spelling issues, also changed a CMYK modifier step.  "Vivid Cyan" and "Vivid Navy" was using the same parameters.  Added a slight be more magenta to Vivid Navy.
+
+- **6.5.27.1943**
   - **Update**: Added a `Build.md` file with detailed build instructions for Visual Studio 2026 and cross-platform builds using CMake. This provides developers with clear guidance on how to compile the library and demos in various environments, ensuring easier adoption and contribution to the project.  Also updated a couple of headers using Windows-specific includes, replacing them with cross-platform alternatives.
 
 - **6.4.18.2248**
   - **Update**: CMYK Modifiers to better reflect the actual CMYK values of the color, rather than a simplified "Cxx Mxx Yxx Kxx" format.  The new format is "C:xx% M:xx% Y:xx% K:xx%" which provides a clearer and more accurate representation of the CMYK components for design and printing applications.
   - **Testing**: Using stress colors used and responses:
     |Color Name|RGB Value|Colors.Dev CMYK Modifier|
-    |---------|---------|-----------------------|
+    |----------|---------|------------------------|
     |'Smoky Taupe'|(R:127, G:129, B:128)|`Smoky Taupe`|
     |'Near Pure Black'|(R:1, G:3, B:2)|`Deep Inky Black`|
     |'Near Pure White'|(R:254, G:252, B:253)|`Paper White`|
     |'Magenta'|(R:255, G:0, B:255)|`Vivid Magenta`|
 
-- **6.4.17.0219** - Current release
+- **6.4.17.0219**
   - **Major Feature**: Added color harmony generation functions:
     - `GetComplementary()`: Generate complementary colors (180° hue rotation)
     - `GetAnalogous()`: Generate analogous color schemes (±30° hue variations)

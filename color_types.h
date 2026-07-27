@@ -15,7 +15,7 @@ typedef double colors_dev_float64;
 typedef struct {
     /// <summary>
     /// Represents an alpha (transparency) value. 
-    /// 0 - 255, Transparncy: 0 = invisible, 255 = solid.
+    /// 0 - 255, Transparency: 0 = invisible, 255 = solid.
     /// </summary>
     unsigned char alpha;
     /// <summary>
@@ -137,7 +137,7 @@ typedef struct {
     /// </summary>
     double hue;
     /// <summary>
-	/// Saturaction: Represents a saturation value. Radius from center to edge of the RGB (0.0-100.0)% color 
+	/// Saturation: Represents a saturation value. Radius from center to edge of the RGB (0.0-100.0)% color 
     /// wheel and checks raw value, aka "black", unlike HSL satruaction that checks white.
     /// The saturation is typically represented as a percentage, ranging from 0.0% to 100.0%.
     /// </summary>
@@ -175,8 +175,8 @@ typedef struct {
     /// </summary>
     double hue;
     /// <summary>
-    /// Satruration: The "purity" or intensity of the color (0-100%) and checks raw lightness, 
-    /// aka "white", unlink HSV saturaction that checks black.
+    /// Saturation: The "purity" or intensity of the color (0-100%) and checks raw lightness, 
+    /// aka "white", unlink HSV Saturation that checks black.
     /// </summary>
     double saturation;
     /// <summary>
