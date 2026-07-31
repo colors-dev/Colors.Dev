@@ -1,6 +1,6 @@
 # Colors.Dev
 
-[![Version](https://img.shields.io/badge/version-6.7.27.0357-blue.svg)](https://github.com/colors-dev/Colors.Dev)
+[![Version](https://img.shields.io/badge/version-6.7.31.0030-blue.svg)](https://github.com/colors-dev/Colors.Dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/colors-dev/Colors.Dev/blob/master/LICENSE.md)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-purple.svg)<br/>
 ![Dependencies](https://img.shields.io/badge/dependencies-none-purple)
@@ -555,7 +555,10 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 ## Version History
 
-- **6.7.27.0357** - Current release
+- **6.7.31.0030** - Current release
+  - There was an update from the last C upgrade and though the method free() was using the correct library, the include was incorrect.  The use of malloc.h over stdlib.h was intentional and the correct one.  stdlib.h would gray out, with cleanup analysis alerting to use malloc.h directly instead.  Definition into free() goes into corecrt_malloc.h which states both malloc.h and stdlib.h use it.  To make the compiler happy, I went with malloc.h.
+
+- **6.7.27.0357**
   - **Update**: Comment spelling issues, also changed a CMYK modifier step.  "Vivid Cyan" and "Vivid Navy" was using the same parameters.  Added a slight be more magenta to Vivid Navy.
 
 - **6.5.27.1943**
