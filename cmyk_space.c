@@ -1,8 +1,9 @@
 // cmyk_conversions.c
 #include "cmyk_space.h"
 #include "common.h"             // For clampInt, clampDbl
-#include <string.h>             // For strlen, strcpy_s
+// #include <string.h>             // For strlen, strcpy_s
 #include <math.h>               // For fmin, fmax, fabs, round, pow
+#include <stdbool.h>            // bool
 
 COLORS_DEV_API CmykSpace RgbToCmyk(RgbColor rgb)
 {
@@ -68,81 +69,93 @@ COLORS_DEV_API RgbColor CmykToRgb(CmykSpace cmyk)
 
 COLORS_DEV_API char* GetCmykMod(CmykSpace cmyk)
 {
+    char intensity[32] = { 0 };
+    char modifier[32] = { 0 };
+
     double c = cmyk.cyan;
     double m = cmyk.magenta;
     double y = cmyk.yellow;
     double k = cmyk.key;
 
-    char keyName[10] = { 0 };
-    char modifier[22] = { 0 };
+    double diffCM = fabs(c - m);    // Blue-family balance
+    double diffMY = fabs(m - y);    // Red-family balance
+    double diffCY = fabs(c - y);    // Green-family balance
+    double maxCmy = fmax(c, fmax(m, y));
+    double minCmy = fmin(c, fmin(m, y));
+    double cmySpread = maxCmy - minCmy;
 
-    // 1. PAPER WHITE (Top priority)
-    if (c < 5.0 && m < 5.0 && y < 5.0 && k < 5.0)
-        return createBuffer("Paper White");
+    bool hasStrongPigment = maxCmy > 70.0;
+    bool isBalancedMix = cmySpread < 15.0;
+    bool hasStrongDominance = cmySpread >= 35.0;
+    bool warmPigment = c < 35.0 && m > 50.0 && y > 55.0;
 
-    // 2. High Black (K) values
+    // PAPER WHITE (Top priority)
+    if (c < 5.0 && m < 5.0 && y < 5.0 && k < 5.0) return createBuffer("Paper White");
+    // BLACKED OUT (Top priority)
     if (k > 95.0) return createBuffer("Deep Inky Black");
-    if (k > 85.0) sprintf_s(keyName, sizeof(keyName), " Blackened");
-    else if (k > 60.0) sprintf_s(keyName, sizeof(keyName), " Darkened");
+    
+    if (k < 8.0)
+        sprintf_s(intensity, sizeof(intensity), hasStrongPigment ? "Vivid" : "Light"); 
+    else if (k < 18.0)
+        sprintf_s(intensity, sizeof(intensity), hasStrongPigment ? "Strong" : "Soft");
+    else if (k < 30.0)
+        sprintf_s(intensity, sizeof(intensity), (warmPigment && hasStrongPigment ? "Fiery" : (hasStrongPigment ? "Bold" : "Muted")));
+    else if (k < 45.0)
+        sprintf_s(intensity, sizeof(intensity), "Rich");
+    else if (k < 60.0)
+        sprintf_s(intensity, sizeof(intensity), (hasStrongDominance ? "Deep" : "Dull"));
+    else if (k < 73.0)
+        sprintf_s(intensity, sizeof(intensity), (hasStrongDominance ? "Darkened" : "Smoked"));
+    else if (k <= 95.0)
+        sprintf_s(intensity, sizeof(intensity), "Blackened");
 
-    // 3. Vivids 
-    if (c > 85.0 && m < 40.0 && y < 40.0) sprintf_s(modifier, sizeof(modifier), "Vivid Cyan");
-    else if (m > 85.0 && c < 60.0 && y < 40.0) sprintf_s(modifier, sizeof(modifier), "Vivid Magenta");
-    else if (c > 85.0 && m < 50.0 && y < 40.0) sprintf_s(modifier, sizeof(modifier), "Vivid Navy");
-    else if (y > 85.0 && c < 40.0 && m < 40.0) sprintf_s(modifier, sizeof(modifier), "Vivid Yellow");
+    // Primary CMY pigments
+    if (c > 85.0 && m < 20.0 && y < 20.0) sprintf_s(modifier, sizeof(modifier), "Cyan");
+    else if (m > 85.0 && c < 20.0 && y < 20.0) sprintf_s(modifier, sizeof(modifier), "Magenta");
+    else if (y > 85.0 && c < 20.0 && m < 20.0) sprintf_s(modifier, sizeof(modifier), "Yellow");
+    // Red: Magenta and Yellow balanced, Cyan low
+    else if (c < 30.0 && m > 70.0 && y > 70.0 && diffMY < 20.0) sprintf_s(modifier, sizeof(modifier), "Red");
+    // Orange: Yellow stronger than Magenta
+    else if (c < 40.0 && y > 70.0 && m > 35.0 && y > m + 15.0) sprintf_s(modifier, sizeof(modifier), "Orange");
+    // Blue: Cyan and Magenta balanced, Yellow low
+    else if (c > 65.0 && m > 65.0 && y < 25.0 && diffCM < 20.0) sprintf_s(modifier, sizeof(modifier), "Blue");
+    // Navy / blue-cyan: Cyan stronger than Magenta
+    else if (c > 60.0 && m > 35.0 && y < 20.0 && c > m + 10.0) sprintf_s(modifier, sizeof(modifier), "Navy");
+    // Specialized mixes Olive (High Yellow, Moderate Cyan, Moderate Key)
+    else if (y > 60.0 && c > 20.0 && m < 30.0 && y > c && diffCY >= 10.0 && k > 20.0) sprintf_s(modifier, sizeof(modifier), "Olive Drab");
+    // Green: Cyan and Yellow balanced, Magenta low
+    else if (c > 50.0 && y > 50.0 && m < 30.0 && diffCY <= 10.0) sprintf_s(modifier, sizeof(modifier), "Green");
+    // Teal: Cyan stronger than Yellow
+    else if (c > 60.0 && y > 30.0 && m < 30.0 && c > y + 15.0) sprintf_s(modifier, sizeof(modifier), "Teal");
+    // Plum / Eggplant (High Magenta, Moderate Cyan/Key)
+    else if (m > 60.0 && c > 30.0 && y < 30.0 && k > 35.0) sprintf_s(modifier, sizeof(modifier), "Plum");
+    // Violet: Magenta stronger than Cyan
+    else if (m > 60.0 && c > 40.0 && y < 30.0 && m > c + 10.0) sprintf_s(modifier, sizeof(modifier), "Violet");
+    // Muted / Tones 
+    else if (isBalancedMix) {
+        sprintf_s(modifier, sizeof(modifier), k < 35.0 ? "Neutral Gray" : "Smoky Taupe");
+        intensity[0] = '\0';    // clear
+    }
+    // Light / Pastel / Tints
+    else if (maxCmy < 40.0 && k < 35.0) {
+        sprintf_s(modifier, sizeof(modifier), "Pale Tint");
+        intensity[0] = '\0';    // clear
+    }
+    // Complex Mixes
+    else if (c > 60.0 && m > 60.0 && y > 60.0 && k < 20.0) sprintf_s(modifier, sizeof(modifier), "Composite Hue");
+    else if (m > 40.0 && y > 55.0 && y > m + 10.0 && c >= 10.0 && c < 40.0 && k > 25.0) sprintf_s(modifier, sizeof(modifier), "Burnished Umber");
 
-    // 4. Strong single CMY
-    else if (c > 70.0 && m < 30.0 && y < 30.0) sprintf_s(modifier, sizeof(modifier), "Strong Cyan");
-    else if (m > 70.0 && c < 30.0 && y < 30.0) sprintf_s(modifier, sizeof(modifier), "Strong Magenta");
-    else if (y > 70.0 && c < 30.0 && m < 30.0) sprintf_s(modifier, sizeof(modifier), "Strong Yellow");
-
-    // 5. Dominant CMY combinations
-    else if (c > 75.0 && m > 75.0 && y < 15.0) sprintf_s(modifier, sizeof(modifier), "Deep Blue");
-    else if (c > 50.0 && m > 50.0 && y < 30.0) sprintf_s(modifier, sizeof(modifier), "Deep Blue Violet");
-    else if (c > 50.0 && m > 25.0 && y == 0.0) sprintf_s(modifier, sizeof(modifier), "Deep Navy");
-    else if (c > 50.0 && y > 50.0 && m < 30.0) sprintf_s(modifier, sizeof(modifier), "Rich Green");
-    else if (m > 50.0 && y > 50.0 && c < 30.0) sprintf_s(modifier, sizeof(modifier), "Fiery Red Orange");
-
-    if (strlen(keyName) > 0 && strlen(modifier) > 0)
-        return combineBuffers(modifier, keyName);
-    // Fall back to generic rich blackened if no strong color dominance
-    else if (strlen(keyName) > 0)
-        return createBuffer(keyName);
-    else if (strlen(modifier) > 0)
+    // modifier and intensity exists
+    if (modifier[0] && intensity[0])
+        return combineBuffers(intensity, modifier);
+    // modifier only exists.
+    if (modifier[0])
         return createBuffer(modifier);
+    // intensity only exists.
+    if (intensity[0])
+        return createBuffer(intensity);
 
-    // 6. Deep Teal / Forest (High Cyan & Yellow, Low Magenta, Moderate Key)
-    if (c > 60.0 && y > 40.0 && m < 30.0 && k > 20.0)
-        return createBuffer("Deep Teal");
-
-    // 7. Olive (High Yellow, Moderate Cyan, Moderate Key)
-    if (y > 60.0 && c > 20.0 && m < 30.0 && k > 20.0)
-        return createBuffer("Olive Drab");
-
-    // 8. Plum / Eggplant (High Magenta, Moderate Cyan/Key)
-    if (m > 60.0 && c > 30.0 && y < 30.0 && k > 20.0)
-        return createBuffer("Deep Plum");
-
-    // 9. Muted / Tones 
-    double diffCM = fabs(c - m);
-    double diffMY = fabs(m - y);
-    if (diffCM < 15.0 && diffMY < 15.0) {
-        if (k < 35.0) return createBuffer("Neutral Gray");
-        return createBuffer("Smoky Taupe");
-    }
-
-    // 10. Light / Pastel / Tints
-    double maxCMY = fmax(c, fmax(m, y));
-    if (maxCMY < 40.0 && k < 35.0) {
-        if (diffCM < 15.0 && diffMY < 15.0) return createBuffer("Pale Gray Tint");
-        return createBuffer("Pale Tint");
-    }
-
-    // 11. Complex Mixes
-    if (c > 60.0 && m > 60.0 && y > 60.0 && k < 20.0) return createBuffer("Bright Composite Hue");
-    if (m > 40.0 && y > 40.0 && c < 40.0 && k > 25.0) return createBuffer("Burnished Umber");
-
-    // 12. Fallthrough
+    // Fallback, "Composite" instead ?
     return createBuffer("Multi-Ink Hue");
 }
 

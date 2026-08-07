@@ -1,10 +1,10 @@
 // xyz_space.c
 #include "xyz_space.h"
-#include "common.h"
-#include <string.h>             // For strlen, strcpy_s
+//#include "common.h"
+//#include <string.h>             // For strlen, strcpy_s
 #include <math.h>               // For fmin, fmax, fabs, round, pow
-#include <stdio.h>              // Required for sprintf
-#include <objbase.h>            // For CoTaskMemAlloc
+//#include <stdio.h>              // Required for sprintf
+//#include <objbase.h>            // For CoTaskMemAlloc
 
 // CIELAB, CIELCh, and CIELUV, and XYZ conversions.
 

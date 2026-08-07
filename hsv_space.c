@@ -161,29 +161,29 @@ COLORS_DEV_API char* GetTemperature(RgbColor rgb)
     while (h < 0) h += 360.0;
     while (h >= 360.0) h -= 360.0;
 
-    // Hot: Red/Magenta wrap
-    if (h >= 315.0 || h < 15.0) return isMuted ? createBuffer("Muted Hot") : createBuffer("Hot");
+    // Red / Red-Magenta
+    if (h >= 315.0 || h < 15.0) return createBuffer(isMuted ? "Muted Hot" : "Hot");
 
     // Warm: Orange/Yellow
-    if (h >= 15.0 && h < 75.0) return isMuted ? createBuffer("Muted Warm") : createBuffer("Warm");
+    if (h < 75.0) return createBuffer(isMuted ? "Muted Warm" : "Warm");
 
     // Neutral-Warm: Yellow-Green
-    if (h >= 75.0 && h < 105.0) return isMuted ? createBuffer("Muted Neutral-Warm") : createBuffer("Neutral-Warm");
+    if (h < 105.0) return isMuted ? createBuffer("Muted Neutral-Warm") : createBuffer("Neutral-Warm");
 
     // Neutral: Green
-    if (h >= 105.0 && h < 135.0) return isMuted ? createBuffer("Muted Neutral") : createBuffer("Neutral");
+    if (h < 135.0) return isMuted ? createBuffer("Muted Neutral") : createBuffer("Neutral");
 
     // Neutral-Cool: Cyan-Green
-    if (h >= 135.0 && h < 165.0) return isMuted ? createBuffer("Muted Neutral-Cool") : createBuffer("Neutral-Cool");
+    if (h < 165.0) return isMuted ? createBuffer("Muted Neutral-Cool") : createBuffer("Neutral-Cool");
 
     // Cool: Cyan/Blue-Cyan
-    if (h >= 165.0 && h < 225.0) return isMuted ? createBuffer("Muted Cool") : createBuffer("Cool");
+    if (h < 225.0) return isMuted ? createBuffer("Muted Cool") : createBuffer("Cool");
 
     // Cold: Blue/Violet
-    if (h >= 225.0 && h < 285.0) return isMuted ? createBuffer("Muted Cold") : createBuffer("Cold");
+    if (h < 285.0) return isMuted ? createBuffer("Muted Cold") : createBuffer("Cold");
 
-    // Fallback: Magenta bridge
-    return isMuted ? createBuffer("Muted Neutral-Warm") : createBuffer("Neutral-Warm");
+    // Cool-Hot transition: Violet/Magenta
+    return createBuffer(isMuted ? "Muted Cool-Hot" : "Neutral-Cool-Hot");
 }
 
 COLORS_DEV_API RgbColor GetComplementary(RgbColor rgb)

@@ -1,4 +1,5 @@
 ﻿using Chizl.ConsoleSupport;
+using System.Diagnostics;
 using System.Text;
 using static ColorApi;
 
@@ -17,6 +18,7 @@ namespace CSharpConsole
         static readonly RgbColor rgbSmokyTaupe = new RgbColor { alpha = 255, red = 127, green = 129, blue = 128 };
         static readonly RgbColor rgbDeepNavy = new RgbColor { alpha = 255, red = 18, green = 52, blue = 86 };
         static readonly RgbColor rgbOrange = new RgbColor { alpha = 255, red = 255, green = 128, blue = 0};
+        static readonly RgbColor rgbFROB = new RgbColor { alpha = 255, red = 29, green = 0, blue = 0 };
 
         static readonly RgbColor rgbEmpty = new RgbColor { alpha = 0, red = 0, green = 0, blue = 0 };
         static readonly RgbColor rgbRed = new RgbColor { alpha = 255, red = 255, green = 0, blue = 0 };
@@ -37,11 +39,15 @@ namespace CSharpConsole
            (rgbAshRose, rgbWhite, "Ash Rose"),
            (rgbNearPureBlack, rgbWhite, "Near Pure Black"),
            (rgbDeepNavy, rgbWhite, "Deep Navy"),
-           (rgbNearPureWhite, rgbBlack, "Near Pure White")
+           (rgbNearPureWhite, rgbBlack, "Near Pure White"),
+           (rgbFROB, rgbWhite, "Fiery Red Orange Blackened"),
+           (rgbVividMagenta, rgbBlack, "Vivid Magenta"),
+           (rgbSmokyTaupe, rgbBlack, "Smoky Taupe")
         };
 
         static void Main(string[] args)
         {
+
             VT.Enable();
             AnyKey("This console buffer will be clear on any key being pressed.", rgbCyan);
             ClearBuffer();
@@ -96,6 +102,7 @@ namespace CSharpConsole
         {
             var pad = " ";
             var sb = new StringBuilder();
+            //var colorName = WeightedCreatorEngine.GenerateDynamicName(clr);
 
             var hsv = RgbToHsv(clr);
             var hsl = RgbToHsl(clr);

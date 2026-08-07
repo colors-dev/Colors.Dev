@@ -294,4 +294,79 @@ typedef struct {
     double h;
 } LchSpace;
 
+/// <summary>
+/// Structured enum/array of a few hundred universally standardized anchor colors (combining standard W3C Web colors and ISCC-NBS blocks):
+/// Represents a color in the CIELAB (L*a*b*) color space.
+/// </summary>
+typedef struct {
+    /// <summary>
+    /// Working for a color name.
+    /// </summary>
+    const char* name;
+    /// <summary>
+    /// 'L' (Lightness): Similar to LCH, this confirms the color is very light. The 'L' component in LAB ranges from 0 (black) to 100 (white).
+    /// </summary>
+    double l;
+    /// <summary>
+    /// 'A' (Green–Red axis): This component indicates the position of the color between green and red.  Negative values indicate green, 
+    /// while positive values indicate red. The 'A' component 
+    /// typically ranges from -128 to 127.
+    /// </summary>
+    double a;
+    /// <summary>
+    /// 'B' (Blue–Yellow axis): This component indicates the position of the color between blue and yellow.  Negative values indicates a 
+    /// shift towards blue. A small negative value here means a very subtle blue tint.  The combination of these small negative 'a' and 'b' 
+    /// values suggests a color that is very close to neutral gray, but with a slight leaning towards the blue-green side, which is 
+    /// characteristic of a pale azure.
+    /// </summary>
+    double b;
+} VettedColor;
+
+/// <summary>
+/// real-world entities (like plants, animals, and consumer products), colors are rarely a single, flat hex code. 
+/// A "Tomato" or "Lava" has a spectrum. We can calculate the perfect linguistic name by treating the dataset 
+/// as scored probability coordinates instead of fixed lookups.
+/// </summary>
+typedef struct {
+    /// <summary>
+    /// Linguistic name
+    /// </summary>
+    const char* name;
+    /// <summary>
+    /// e.g., your percentage column (38.98% for Chili Pepper)
+    /// </summary>
+    double target_value;
+    /// <summary>
+    /// The lowest acceptable bound for this name
+    /// </summary>
+    double range_min;
+    /// <summary>
+    /// The highest acceptable bound for this name
+    /// </summary>
+    double range_max;
+    /// <summary>
+    /// Real-world intensity score (Chili is high chroma, Barn Silo is low)
+    /// </summary>
+    double typical_chroma;
+} PhysicalAnchor;
+
+/// <summary>
+/// Define the 4 structural buckets matching your document
+/// </summary>
+typedef enum {
+    BUCKET_LIGHTEST_PINKS,
+    BUCKET_BRIGHT_CLASSIC,
+    BUCKET_MID_TO_DEEP,
+    BUCKET_DARKEST_CRIMSON
+} ColorBucket;
+
+typedef struct {
+    const char* name;
+    ColorBucket bucket;
+    double target_percentage; // The sorted position from your spreadsheet
+    double primary_hue;       // Expecting ~0°/360° for red, ~120° for green, etc.
+    double min_saturation;    // Low for "Barn Silo", Max for "Poison Arrow Frog"
+} PhysicalColorNode;
+
+
 #endif // COLORS_DEV_TYPES_H

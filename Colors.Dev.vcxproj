@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="ansi_printing.c" />
     <ClCompile Include="cmyk_space.c" />
+    <ClCompile Include="color_naming.c" />
     <ClCompile Include="color_support.c" />
     <ClCompile Include="hsl_space.c" />
     <ClCompile Include="hsv_space.c" />
@@ -32,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ansi_printing.h" />
+    <ClInclude Include="color_naming.h" />
     <ClInclude Include="color_types.h" />
     <ClInclude Include="cmyk_space.h" />
     <ClInclude Include="color_support.h" />
