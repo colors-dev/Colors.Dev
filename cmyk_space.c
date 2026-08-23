@@ -76,6 +76,12 @@ COLORS_DEV_API char* GetCmykMod(CmykSpace cmyk)
     double y = cmyk.yellow;
     double k = cmyk.key;
 
+    double cmykVals[4];
+    cmykVals[0] = c;
+    cmykVals[1] = m;
+    cmykVals[2] = y;
+    cmykVals[3] = k;
+
     double diffCM = fabs(c - m);    // Blue-family balance
     double diffMY = fabs(m - y);    // Red-family balance
     double diffCY = fabs(c - y);    // Green-family balance
@@ -116,11 +122,11 @@ COLORS_DEV_API char* GetCmykMod(CmykSpace cmyk)
 
     // Primary CMY pigments
     // Cyan Rule (Absolute High OR Relative Dominance)
-    if ((c > 85.0 && m < 20.0 && y < 20.0) || (c == maxCmy && cmySpread > 10.0 && m < 20.0 && m < c - 10.0 && y < c - 10.0)) sprintf_s(modifier, sizeof(modifier), "Cyan");
+    if ((c > 85.0 && m < 20.0 && y < 20.0) || (c == maxCmy && cmySpread > 10.0 && m < 20.0 && y < 30.0 && y < c - 10.0)) sprintf_s(modifier, sizeof(modifier), "Cyan");
     // Magenta Rule
-    else if ((m > 85.0 && c < 20.0 && y < 20.0) || (m == maxCmy && cmySpread > 10.0 && c < m - 10.0 && y < m - 10.0)) sprintf_s(modifier, sizeof(modifier), "Magenta");
+    else if ((m > 85.0 && c < 20.0 && y < 20.0) || (m == maxCmy && cmySpread > 10.0 && c < 35.0 && y < m - 10.0)) sprintf_s(modifier, sizeof(modifier), "Magenta");
     // Yellow Rule (This fixes your 23.6% Yellow issue!)
-    else if ((y > 85.0 && c < 20.0 && m < 20.0) || (y == maxCmy && cmySpread > 10.0 && c < y - 10.0 && m < 20.0 && m < y - 10.0)) sprintf_s(modifier, sizeof(modifier), "Yellow");
+    else if ((y > 85.0 && c < 20.0 && m < 20.0) || (y == maxCmy && cmySpread > 10.0 && c < 30.0 && m < 20.0 && c < y - 10.0)) sprintf_s(modifier, sizeof(modifier), "Yellow");
     // Red Rule (Magenta and Yellow are both high and close, Cyan is low)
     else if ((c < 30.0 && m > 70.0 && y > 70.0 && diffMY < 20.0) || (c < maxCmy && m > c + 15.0 && y > c + 15.0 && diffMY < 15.0)) sprintf_s(modifier, sizeof(modifier), "Red");
     // Orange: Yellow absolute high OR Yellow is dominant max with Magenta as a clear second place
@@ -141,12 +147,29 @@ COLORS_DEV_API char* GetCmykMod(CmykSpace cmyk)
     else if (m == maxCmy && m > 55.0 && c > 35.0 && y < 25.0 && m > c + 10.0 && cmySpread >= 25.0) sprintf_s(modifier, sizeof(modifier), "Violet");
     // Muted / Tones 
     else if (isBalancedMix) {
-        sprintf_s(modifier, sizeof(modifier), k < 35.0 ? "Gray" : "Taupe");
+        // Taupe requires a slight warm bias. If it's truly neutral, it's just Gray.
+        bool isWarmGray = (y > c + 4.0 || m > c + 4.0);
+        sprintf_s(modifier, sizeof(modifier), isWarmGray ? "Taupe" : "Gray");
         if (k <= 45.0) intensity[0] = '\0';  // clear only if it's brighter that Rich, or if it's Gray.
     }
     // Complex Mixes
     else if (c > 60.0 && m > 60.0 && y > 60.0 && k < 20.0) sprintf_s(modifier, sizeof(modifier), "Composite");  //Composite Hue
     else if (m > 40.0 && y > 55.0 && y > m + 10.0 && c >= 10.0 && c < 40.0 && k > 25.0) sprintf_s(modifier, sizeof(modifier), "Burnished Umber");
+
+    int isSolid = 1;
+
+    for (int d = 0; d < 4; d++) {
+        double val = cmykVals[d];
+        // Allow 0, 100, and the digital center (49.5 to 50.5)
+        if (val != 0.0 && val != 100.0 && !(val >= 49.5 && val <= 50.5))
+        {
+            isSolid = 0;
+            break;
+        }
+    }
+
+    // if all are max or min, then it's a solid and we don't need Vivid Red and Vivid Cyan.
+    if (isSolid) intensity[0] = '\0';
 
     // modifier and intensity exists
     if (modifier[0] && intensity[0])
