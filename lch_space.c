@@ -27,8 +27,7 @@ COLORS_DEV_API LchSpace LabToLch(LabSpace lab)
     }
     else {
         H = atan2(b, a) * (180.0 / COLORS_PI);
-        if (H < 0.0) //H += 360.0;
-            H = fmod(H + 360.0, 360.0);
+        if (H < 0.0) H += 360.0; // Faster than fmod()
     }
 
     LchSpace lch = { lab.l, C, H };

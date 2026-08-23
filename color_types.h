@@ -67,6 +67,17 @@ typedef struct {
 } AnalogousResults;
 
 /// <summary>
+/// Contains the results of a split-complementary color scheme calculation.
+/// </summary>
+typedef struct {
+    /// <summary>
+    /// An array of two RgbColor objects representing the split-complementary colors.
+    /// [0] is +150 degrees, [1] is +210 degrees from the base hue.
+    /// </summary>
+    RgbColor colors[2];
+} SplitComplementaryResults;
+
+/// <summary>
 /// Represents a color in linear color space with alpha, red, green, and blue channels.
 /// </summary>
 typedef struct {
@@ -179,6 +190,11 @@ typedef struct {
     /// aka "white", unlink HSV Saturation that checks black.
     /// </summary>
     double saturation;
+    /// <summary>
+    /// Saturation: The "purity" or intensity of the color (0-100%) and checks raw lightness, 
+    /// aka "white", unlink HSV Saturation that checks black.
+    /// </summary>
+    double saturationNormalized;
     /// <summary>
     /// Lightness: The "brightness" or "luminance" of the color (0-100%).
 	/// The lightness component in HSL ranges from 0% to 100%, where 0% represents black, 50% represents the pure hue, and 100% represents white.

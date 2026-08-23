@@ -2,8 +2,8 @@
 
 #include "luv_space.h"
 #include "xyz_space.h"          // For RgbToLch -> XyzToLab and XyzToLab
-#include "common.h"             // For clampInt, clampDbl
-#include <string.h>             // For strlen, strcpy_s
+// #include "common.h"             // For clampInt, clampDbl
+// #include <string.h>             // For strlen, strcpy_s
 #include <math.h>               // For fmin, fmax, fabs, round, pow
 
 COLORS_DEV_API LuvSpace XyzToLuvEx(XyzSpace xyz, WhitePointType wp)
@@ -37,14 +37,16 @@ COLORS_DEV_API LuvSpace XyzToLuvEx(XyzSpace xyz, WhitePointType wp)
     //// Calculate L*
     const double delta = 6.0 / 29.0;
     const double deltaCubed = (delta * delta * delta); // (6/29)^3
-
     double l, u, v = 0.0;
-    if ((xyz.y / wpY) > deltaCubed)
-        l = 116 * pow(xyz.y / wpY, 1.0 / 3.0) - 16;
-    else
-        l = (29.0 / 6.0) * (29.0 / 6.0) * (29.0 / 6.0) * (xyz.y / wpY);
 
-    //// Calculate u* and v*
+    if ((xyz.y / wpY) > deltaCubed) {
+        l = 116 * pow(xyz.y / wpY, 1.0 / 3.0) - 16;
+    } else {
+        // changed for dark tests like #010302, #010202, and #1D0000 should line up with Lab's L* and the expected LUV values.
+        l = (29.0 / 3.0) * (29.0 / 3.0) * (29.0 / 3.0) * (xyz.y / wpY);
+    }
+
+    // Calculate u* and v*
     u = 13 * l * (u_prime - un_prime);
     v = 13 * l * (v_prime - vn_prime);
 

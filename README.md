@@ -1,6 +1,6 @@
 # Colors.Dev
 
-[![Version](https://img.shields.io/badge/version-6.7.31.0030-blue.svg)](https://github.com/colors-dev/Colors.Dev)
+[![Version](https://img.shields.io/badge/version-6.8.23.0049-blue.svg)](https://github.com/colors-dev/Colors.Dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/colors-dev/Colors.Dev/blob/master/LICENSE.md)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-purple.svg)<br/>
 ![Dependencies](https://img.shields.io/badge/dependencies-none-purple)
@@ -10,11 +10,14 @@ A lightweight, cross-platform C/C++ library with .NET interop for color manipula
 
 ---
 
+
 ## Features
 
-- **Color Space Conversions**: Convert between RGB, HSV, HSL, CMYK, XYZ, Lab, Lch, Luv, sRGB, and Linear color spaces.
+- **Color Space Conversions**: Convert between RGB, HSV, HSL, CMYK, XYZ, Lab, Lch, Luv, sRGB, and Linear color spaces.  
+  * HSL, as a standard, has unnormalized saturation, which can produce mathematically valid and is what most all components return for HSL.
+  * The standard HSL math can produce mathematically valid but perceptually odd saturation near the lightness and darkness extremes.  For example, something like (255, 254, 254) can be essentially white to the human while HSL reports a very high saturation because the denominator becomes tiny and shows 100% for Saturation. HslSpace.saturationNormalized property will have the normalize value of the saturation to a more perceptually accurate value showing 0.39%.  This is useful for color analysis and palette generation.
 - **Color Characteristics**: Tone, Temperature, Brightness, Luminance, Contrast Ratio, and more.
-- **Color Harmony**: Complementary, Analogous, Triadic, and Tetradic color scheme generation.
+- **Color Harmony**: SplitComplementary, Complementary, Analogous, Triadic, and Tetradic color scheme generation.
 - **Color Representation**: CMYK Modifiers, Hex and Decimal format conversions.
 - **Console Color Support**: Set 24-bit true colors for foreground and background in console applications
 - **ANSI Escape Sequences**: Automatic ANSI color code generation for terminal rendering
@@ -123,7 +126,7 @@ int main() {
   RgbColor cyan = { 255, 0, 255, 255 }; // alpha, red, green, blue
   // Convert to HSV
   HsvSpace hsv = RgbToHsv(cyan);
-  printf("HSV: H:%.2f, S:%.2f, V:%.2f\n", hsv.hue, hsv.saturation, hsv.value);
+  printf("HSV: H:%.2f, S:%.2f, SN:%.2f, V:%.2f\n", hsv.hue, hsv.saturation, hsv.saturationNormalized, hsv.value);
   // Convert to XYZ
   XyzSpace xyz = RgbToXyz(cyan);
   printf("XYZ: X%.2f, Y:%.2f, Z:%.2f\n", xyz.x, xyz.y, xyz.z);
@@ -156,7 +159,8 @@ var cyan = new RgbColor { alpha = 255, red = 0, green = 255, blue = 255 };
 
 // Convert to HSL 
 var hsl = RgbToHsl(cyan); 
-Console.WriteLine($"HSL: H:{hsl.hue:0.00}, S:{hsl.saturation:0.00}, L:{hsl.lightness:0.00}");
+Console.WriteLine($"HSL: H:{hsl.hue:0.00}, S:{hsl.saturation:0.00}, S:{hsl.saturationNormalized:0.00}, L:{hsl.lightness:0.00}");
+
 // Convert to XYZ
 var xyz = RgbToXyz(cyan);
 Console.WriteLine($"XYZ: X:{xyz.x:0.00}, Y:{xyz.y:0.00}, Z:{xyz.z:0.00}");
@@ -186,11 +190,14 @@ ClearBuffer();
 
 * `HsvSpace RgbToHsv(RgbColor rgb)`
   * Converts RGB (0-255) to HSV color space.
-  * **Returns**: `HsvSpace` with hue (0-360&deg;), saturation (0-100%), value (0-100%), and raw_value for improved round-trip accuracy.
+  * **Returns**: `HsvSpace` with hue (0-360&deg;), saturation (0-100%), saturationNormalized (0-100%), value (0-100%), and raw_value for improved round-trip accuracy.
 
 * `HslSpace RgbToHsl(RgbColor rgb)`
   * Converts RGB to HSL (Hue, Saturation, Lightness) color space.
-  * **Returns**: `HslSpace` with hue (0-360&deg;), saturation (0-100%), lightness (0-100%), and raw_lightness for improved round-trip accuracy.
+  * It returns both normalized saturation and unnormalized saturation, which can produce mathematically valid and is what most all components return for HSL.
+  * The standard HSL math can produce mathematically valid but perceptually odd saturation near the lightness and darkness extremes.  For example, something like (255, 254, 254) can be essentially white to a human while HSL reports a very high saturation because the denominator becomes tiny. saturationNormalized will normalize the saturation to a more perceptually accurate value, 0% at the extremes and 100% at the mid-range.  This is useful for color analysis and palette generation.
+  * **Note**: HslSpace.saturationNormalized is not used during any conversions.
+  * **Returns**: `HslSpace` with hue (0-360&deg;), saturation (0-100%), saturationNormalized (0-100%), lightness (0-100%), and raw_lightness for improved round-trip accuracy.
 
 * `XyzSpace RgbToXyz(RgbColor rgb)`
   * Converts RGB to XYZ color space.
@@ -235,6 +242,7 @@ ClearBuffer();
 
 * `RgbColor HslToRgb(HslSpace hsl)`
   * Converts HSL to RGB. Uses raw_lightness if available for precision.
+  * **Note**: HslSpace.saturationNormalized is not used during any conversions.
   * **Returns**: `RgbColor` with alpha set to 255.
 
 * `RgbColor CmykToRgb(CmykSpace cmyk)`
@@ -275,6 +283,17 @@ ClearBuffer();
   * **Returns**: `RgbColor` representing the precision complementary color.
   * **Use Case**: Creating high-contrast color pairs for UX design.
 
+* `RgbColor GetMonochromaticVariant(RgbColor rgb, double lightnessShift)`
+  * Generates a monochromatic variant of the input color by adjusting its lightness in HSL space while preserving hue and saturation, then converting back to RGB.
+  * `lightnessShift`: A value between -100.0 and 100.0 representing the percentage change in lightness (negative for darker, positive for lighter).
+  * **Returns**: `RgbColor` representing the monochromatic variant/shifted by the specified lightness amount.
+  * **Use Case**: Creating subtle variations of a base color for UI elements or design consistency.
+
+* `SplitComplementaryResults GetSplitComplementary(RgbColor rgb)`
+  * Generates a split-complementary color scheme by rotating the hue ±150 degrees in HSV space while preserving the original raw value component, then converting back to RGB.
+  * **Returns**: `SplitComplementaryResults` containing 2 `RgbColor` values representing the split-complementary color.
+  * **Use Case**: Creating visually appealing color schemes with less tension than direct complements. 
+
 * `AnalogousResults GetAnalogous(RgbColor rgb)`
   * Generates an analogous color scheme with two colors adjacent on the color wheel (+30° and -30° from the input hue).
   * **Returns**: `AnalogousResults` containing 2 `RgbColor` values.
@@ -289,6 +308,13 @@ ClearBuffer();
   * Generates a tetradic (square) color scheme with three colors forming a square on the color wheel (90°, 180°, and 270° from the input hue).
   * **Returns**: `TetradicResults` containing 3 `RgbColor` values.
   * **Use Case**: Creating rich, complex color palettes with maximum variety.
+
+* `RgbColor GenerateContrastColor(RgbColor base, double targetRatio, double targetHue, double targetSat)`
+  * Calculates a specific, colored contrast match that meets a target WCAG relative luminance ratio against the base color, bypassing the standard binary black-or-white fallback. 
+  * `targetRatio`: The desired contrast ratio to achieve (e.g., 4.5 for WCAG AA normal text).
+  * `targetHue` The hue angle (0.0-360.0) to lock in for the resulting contrast color.
+  * `targetSat` The saturation percentage (0.0-100.0) to lock in for the resulting contrast color.
+  * **Returns**: An `RgbColor` instance representing the generated contrast color.
 
 ### Format Conversions
 
@@ -362,26 +388,6 @@ ClearBuffer();
 * `double GetPerceptualBrightness(RgbColor rgb)`
   * Calculates the perceptual brightness of an RGB color using a formula that weights the red, green, and blue components according to human visual sensitivity. This is often used for determining text color contrast and overall color visibility.
   * **Returns**: The perceptual brightness value as a 64-bit floating-point number, typically in the range [0.0, 255.0], where higher values indicate brighter colors.
-
-* `double GetHslLightness(RgbColor rgb)`
-  * Calculates the lightness component of the HSL (Hue, Saturation, Lightness) color model from an RGB color. The lightness value represents the perceived brightness of the color, where 0.0 is black, 1.0 is white, and 0.5 is the pure hue with no added white or black.
-  * **Returns**: The lightness value as a 64-bit floating-point number, typically in the range [0.0, 1.0].
-
-* `double GetHslSaturation(RgbColor rgb)`
-  * Calculates the saturation component of the HSL (Hue, Saturation, Lightness) color model from an RGB color. The saturation value represents the intensity or purity of the color, where 0.0 is completely desaturated (gray) and 1.0 is fully saturated (vivid color).
-  * **Returns**: The saturation value in HSL color space as a 64-bit floating-point number, typically in the range [0.0, 1.0].  
-
-* `double GetHue(RgbColor rgb)`
-  * Calculates the Hue component of the HSV/HSL color model from an RGB color. The hue value represents the type of color (e.g., red, green, blue) and is typically measured in degrees on the color wheel, where 0&deg; is red, 120&deg; is green, and 240&deg; is blue.
-  * **Returns**: The hue value as a 64-bit floating-point number, typically in the range [0.0, 360.0) degrees.
-
-* `double GetHsvSaturation(RgbColor rgb)`
-  * Calculates the Saturation component of the HSV (Hue, Saturation, Value) color model from an RGB color.
-  * **Returns**: The saturation value in the HSV color space as a 64-bit floating-point number, typically in the range [0.0, 1.0].
-
-* `double GetHsvBrightness(RgbColor rgb)`
-  * Calculates the Brightness component of the HSV (Hue, Saturation, Value) color model from an RGB color.
-  * **Returns**: The brightness value as a 64-bit floating-point number, typically in the range [0.0, 1.0].
 
 * `double GetContrastRatio(RgbColor color1, RgbColor color2)`
   * Calculates the contrast ratio between two RGB colors using their relative luminance values. This is commonly used for assessing text readability and accessibility.
@@ -554,8 +560,13 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 ---
 
 ## Version History
+- **6.8.23.0049** - Current release
+  - **Update**: Updating CMYK Modifier to be more clear with Intensity by use of strong pigment, warm pigment, and dominance.  This allows for better representation for dark and light colors instead of just saying dual red.  It is also more precise for 13 modifier/base color names.
+  - Added saturationNormalized property to HslSpace to allow for normalized saturation value for HSL.  This is useful for color analysis and palette generation.
+  - XyzToLuv() and RgbToLuv use XyzToLuvEx() and were all affected.  XyzToLuvEx() during dark tests like #010302, #010202, and #1D0000 should line up with Lab's L* and the expected LUV values, and it wasn't.
+    - XyzToLuvEx().l = was being divided by 6.0, e.g. `(29.0 / 6.0) *` and now it's `(29.0 / 3.0) *`;
 
-- **6.7.31.0030** - Current release
+- **6.7.31.0030**
   - There was an update from the last C upgrade and though the method free() was using the correct library, the include was incorrect.  The use of malloc.h over stdlib.h was intentional and the correct one.  stdlib.h would gray out, with cleanup analysis alerting to use malloc.h directly instead.  Definition into free() goes into corecrt_malloc.h which states both malloc.h and stdlib.h use it.  To make the compiler happy, I went with malloc.h.
 
 - **6.7.27.0357**
@@ -596,7 +607,7 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
   - Added GetBestContrastColor() method to determine whether black or white text would provide better contrast against a given background color. This is useful for ensuring text readability and accessibility when dynamically setting console colors or designing user interfaces.
 
 - **6.3.19.0100**
-  - Added methods, GetHue(), GetHsvSaturation(), GetHslSaturation(), GetHslLightness(), GetHsvBrightness(), GetRelativeLuminance(), GetPerceptualBrightness(), GetContrastRatio(). These methods provide additional color information and are useful for tasks like determining text contrast, performing color adjustments, and analyzing color properties for accessibility and design purposes.
+  - Added methods, GetRelativeLuminance(), GetPerceptualBrightness(), GetContrastRatio(). These methods provide additional color information and are useful for tasks like determining text contrast, performing color adjustments, and analyzing color properties for accessibility and design purposes.
 
 - **6.3.18.2120**
   - Added RGB to Linear and Linear to RGB conversions for applications that require linear color space processing, such as advanced graphics rendering and color grading workflows.  Also added SrgbToLinear and LinearToSrgb functions for single channel conversions to support more granular color adjustments in linear space.

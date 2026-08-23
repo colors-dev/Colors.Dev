@@ -1,5 +1,7 @@
 // hsv_space.c
 #include "hsv_space.h"
+#include "hsl_space.h"
+#include "xyz_space.h"
 #include "common.h"             // For clampDbl
 #include <math.h>               // For fmin, fmax, fabs, round, pow
 // CIELAB, CIELCh, and CIELUV, and XYZ conversions.
@@ -79,21 +81,6 @@ COLORS_DEV_API HsvSpace RgbToHsv(RgbColor rgb)
 
     HsvSpace hsv = { h, s * 100.0, v * 100.0, raw };
     return hsv;
-}
-
-COLORS_DEV_API colors_dev_float64 GetHue(RgbColor rgb) 
-{
-    return RgbToHsv(rgb).hue;
-}
-
-COLORS_DEV_API colors_dev_float64 GetHsvSaturation(RgbColor rgb)
-{
-    return RgbToHsv(rgb).saturation;
-}
-
-COLORS_DEV_API colors_dev_float64 GetHsvBrightness(RgbColor rgb) 
-{
-	return RgbToHsv(rgb).raw_value;
 }
 
 COLORS_DEV_API char* GetTone(RgbColor rgb)
@@ -206,7 +193,8 @@ COLORS_DEV_API TriadicResults GetTriadic(RgbColor rgb)
     double angles[2] = { 120.0, 240.0 };
 
     for (int i = 0; i < 2; i++) {
-        double newHue = fmod(hsv.hue + angles[i], 360.0);
+        double newHue = hsv.hue + angles[i];
+        if (newHue >= 360.0) newHue -= 360.0; // Faster than fmod()
         HsvSpace hsvNext = { newHue, hsv.saturation, hsv.value, hsv.raw_value };
         result.colors[i] = HsvToRgb(hsvNext);
     }
@@ -220,7 +208,8 @@ COLORS_DEV_API AnalogousResults GetAnalogous(RgbColor rgb)
     AnalogousResults res;
 
     // Clockwise (+30)
-    double hPlus = fmod(hsv.hue + 30.0, 360.0);
+    double hPlus = hsv.hue + 30.0;
+    if (hPlus >= 360.0) hPlus -= 360.0; // Faster than fmod()
     res.colors[0] = HsvToRgb((HsvSpace) { hPlus, hsv.saturation, hsv.value, hsv.raw_value });
 
     // Counter-Clockwise (-30)
@@ -231,6 +220,42 @@ COLORS_DEV_API AnalogousResults GetAnalogous(RgbColor rgb)
     return res;
 }
 
+COLORS_DEV_API SplitComplementaryResults GetSplitComplementary(RgbColor rgb)
+{
+    HsvSpace hsv = RgbToHsv(rgb);
+    SplitComplementaryResults result;
+
+    // Split-Complementary angles: +150 and +210 degrees
+    double angles[2] = { 150.0, 210.0 };
+
+    for (int i = 0; i < 2; i++) {
+        double newHue = hsv.hue + angles[i];
+
+        // Fast wrap-around 
+        if (newHue >= 360.0) {
+            newHue -= 360.0;
+        }
+
+        HsvSpace hsvNext = { newHue, hsv.saturation, hsv.value, hsv.raw_value };
+        result.colors[i] = HsvToRgb(hsvNext);
+    }
+
+    return result;
+}
+
+/// <summary>
+/// Generates a tetradic color harmony from the specified RGB color.
+/// The original color's hue is not in this results, but has the three
+/// additional colors generated at 90, 180, and 270-degree hue offsets.
+/// Saturation and value are preserved from the original color.
+/// </summary>
+/// <param name="rgb">
+/// The RGB color used as the starting color for the tetradic palette.
+/// </param>
+/// <returns>
+/// A TetradicResults structure containing only the three harmonically 
+/// related colors evenly spaced around the hue wheel.
+/// </returns>
 COLORS_DEV_API TetradicResults GetTetradic(RgbColor rgb)
 {
     HsvSpace hsv = RgbToHsv(rgb);
@@ -239,10 +264,109 @@ COLORS_DEV_API TetradicResults GetTetradic(RgbColor rgb)
     double angles[3] = { 90.0, 180.0, 270.0 };
 
     for (int i = 0; i < 3; i++) {
-        double newHue = fmod(hsv.hue + angles[i], 360.0);
+        double newHue = hsv.hue + angles[i];
+        if (newHue >= 360.0) newHue -= 360.0; // Faster than fmod()
         HsvSpace hsvNext = { newHue, hsv.saturation, hsv.value, hsv.raw_value };
         result.colors[i] = HsvToRgb(hsvNext);
     }
 
     return result;
+}
+
+COLORS_DEV_API colors_dev_float64 GetRelativeLuminance(RgbColor rgb)
+{
+    return RgbToXyz(rgb).y;
+}
+
+COLORS_DEV_API colors_dev_float64 GetPerceptualBrightness(RgbColor rgb) {
+    return RgbToLab(rgb).l;
+}
+
+COLORS_DEV_API colors_dev_float64 GetContrastRatio(RgbColor a, RgbColor b)
+{
+    // Ensure these are normalized luminance
+    colors_dev_float64 la = GetRelativeLuminance(a) / 100.0;
+    colors_dev_float64 lb = GetRelativeLuminance(b) / 100.0;
+
+    colors_dev_float64 l1 = (la > lb) ? la : lb;
+    colors_dev_float64 l2 = (la > lb) ? lb : la;
+
+    return (l1 + 0.05) / (l2 + 0.05);
+}
+
+COLORS_DEV_API colors_dev_color32 GetBestContrastColor(RgbColor bgColor)
+{
+    RgbColor white = { 255, 255, 255, 255 };
+    RgbColor black = { 255, 0, 0, 0 };
+
+    return (GetContrastRatio(bgColor, white) >= GetContrastRatio(bgColor, black));
+}
+
+COLORS_DEV_API RgbColor GenerateContrastColor(RgbColor base, double targetRatio, double targetHue, double targetSat)
+{
+    if (targetRatio < 1.0)
+        targetRatio = 1.0;
+    else if (targetRatio > 21.0)
+        targetRatio = 21.0;
+
+    if (targetHue < 0.0)
+        targetHue = 0.0;
+    else if (targetHue >= 360.0)
+        targetHue = fmod(targetHue, 360.0);
+
+    if (targetSat < 0.0)
+        targetSat = 0.0;
+    else if (targetSat > 100.0)
+        targetSat = 100.0;
+
+    double baseLum = GetRelativeLuminance(base) / 100;
+
+    // Determine whether the target should be lighter or darker.
+    double lighterLum = (baseLum + 0.05) * targetRatio - 0.05;
+    int goLighter = lighterLum <= 1.0;
+
+    double low = 0.0;
+    double high = 1.0;
+
+    RgbColor best = base;
+    double bestRatio = 0.0;
+
+    for (int i = 0; i < 12; i++)
+    {
+        double mid = (low + high) / 2.0;
+
+        HslSpace tempHsl = {
+            targetHue,
+            targetSat,
+            0.0,
+            mid * 100.0,
+            mid
+        };
+
+        RgbColor candidate = HslToRgb(tempHsl);
+        double ratio = GetContrastRatio(base, candidate);
+
+        if (ratio >= targetRatio)
+        {
+            best = candidate;
+            bestRatio = ratio;
+
+            // Move toward the base color while still trying
+            // to maintain the requested contrast.
+            if (goLighter)
+                high = mid;
+            else
+                low = mid;
+        }
+        else
+        {
+            // Need more contrast.
+            if (goLighter)
+                low = mid;
+            else
+                high = mid;
+        }
+    }
+
+    return best;
 }

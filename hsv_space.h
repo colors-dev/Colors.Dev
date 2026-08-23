@@ -29,29 +29,6 @@ COLORS_DEV_API HsvSpace RgbToHsv(RgbColor rgb);
 COLORS_DEV_API RgbColor HsvToRgb(HsvSpace hsv);
 
 /// <summary>
-/// Calculates the Hue component of the HSV/HSL from an RGB color.  
-/// Hue from both HSV and HSL are always the same value, so this function can be used for both color spaces.
-/// </summary>
-/// <param name="rgb">The RGB color from which to extract the hue.</param>
-/// <returns>The hue value as a 64-bit floating-point number, typically in the range [0, 360) degrees.</returns>
-COLORS_DEV_API colors_dev_float64 GetHue(RgbColor rgb);
-
-/// <summary>
-/// Calculates the Saturation component of the HSV (Hue, Saturation, Value) color model from an RGB color.
-/// </summary>
-/// <param name="rgb">The RGB color to extract the saturation from.</param>
-/// <returns>The saturation value in the HSV color space, typically in the range [0.0, 1.0].</returns>
-COLORS_DEV_API colors_dev_float64 GetHsvSaturation(RgbColor rgb);
-
-/// <summary>
-/// Calculates the Brightness of an RGB color from the HSV (Hue, Saturation, Value, Raw_Value) color model.
-/// This is the "Raw_Value" component of HSV, which represents the unchanged value "brightness" of the color.
-/// </summary>
-/// <param name="rgb">The RGB color to calculate brightness for.</param>
-/// <returns>The brightness value as a 64-bit floating point number.</returns>
-COLORS_DEV_API colors_dev_float64 GetHsvBrightness(RgbColor rgb);
-
-/// <summary>
 /// NOTE: Remember to free the returned string using FreeAllocPtr when done.  
 /// This function analyzes the HSV components of the RGB color to determine its tone, 
 /// which can be described as light, dark, muted, vibrant, etc., based on the 'value'
@@ -84,6 +61,13 @@ COLORS_DEV_API RgbColor GetComplementary(RgbColor rgb);
 COLORS_DEV_API AnalogousResults GetAnalogous(RgbColor rgb);
 
 /// <summary>
+/// 
+/// </summary>
+/// <param name="rgb"></param>
+/// <returns></returns>
+COLORS_DEV_API SplitComplementaryResults GetSplitComplementary(RgbColor rgb);
+
+/// <summary>
 /// Computes the triadic color scheme for a given RGB color.
 /// </summary>
 /// <param name="clr">The RGB color to compute the triadic scheme for.</param>
@@ -91,11 +75,22 @@ COLORS_DEV_API AnalogousResults GetAnalogous(RgbColor rgb);
 COLORS_DEV_API TriadicResults GetTriadic(RgbColor rgb);
 
 /// <summary>
-/// Computes a tetradic (four-color) color scheme based on the given RGB color.
+/// Computes a tetradic (three-color) color scheme, without original, based on the given RGB color.
 /// </summary>
 /// <param name="rgb">The RGB color to use as the basis for the tetradic color scheme.</param>
-/// <returns>A TetradicResults object containing the four colors that form a tetradic relationship with the input color.</returns>
+/// <returns>A TetradicResults object containing the three colors that form a tetradic relationship with the input color.</returns>
 COLORS_DEV_API TetradicResults GetTetradic(RgbColor rgb);
+
+/// <summary>
+/// Calculates a specific, colored contrast match that meets a target WCAG relative luminance ratio 
+/// against the base color, bypassing the standard binary black-or-white fallback.
+/// </summary>
+/// <param name="base">The original RGB color to evaluate against.</param>
+/// <param name="targetRatio">The desired contrast ratio to achieve (e.g., 4.5 for WCAG AA normal text).</param>
+/// <param name="targetHue">The hue angle (0.0-360.0) to lock in for the resulting contrast color.</param>
+/// <param name="targetSat">The saturation percentage (0.0-100.0) to lock in for the resulting contrast color.</param>
+/// <returns>An RGB color mathematically adjusted along the lightness axis to achieve the target contrast ratio.</returns>
+COLORS_DEV_API RgbColor GenerateContrastColor(RgbColor base, double targetRatio, double targetHue, double targetSat);
 
 // --- End of "extern C" block ---
 #ifdef __cplusplus

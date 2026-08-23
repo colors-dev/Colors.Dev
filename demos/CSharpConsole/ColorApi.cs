@@ -25,6 +25,24 @@ internal struct TetradicResults
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 8)]
+/// <summary>
+/// Contains the results of a split-complementary color scheme calculation.
+/// </summary>
+internal struct SplitComplementaryResults
+{
+    [FieldOffset(0)] public RgbColor Color1;
+    [FieldOffset(4)] public RgbColor Color2;
+    /// <summary>
+    /// An array of two RgbColor objects representing the split-complementary colors.
+    /// [0] is +150 degrees, [1] is +210 degrees from the base hue.
+    /// </summary>
+    public RgbColor[] GetColors()
+    {
+        return new RgbColor[] { Color1, Color2 };
+    }
+}
+
+[StructLayout(LayoutKind.Explicit, Size = 8)]
 internal struct AnalogousResults
 {
     [FieldOffset(0)] public RgbColor Color1;
@@ -67,6 +85,7 @@ internal struct HslSpace
 {
     public double hue;
     public double saturation;
+    public double saturationNormalized;
     public double lightness;
     public double raw_lightness;
 }
@@ -146,9 +165,12 @@ internal static class ColorApi
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern RgbColor GetComplementary(RgbColor rgb);
 
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern RgbColor GetMonochromaticVariant(RgbColor rgb, double lightnessShift);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     private static extern nint GetTone(RgbColor rgb);
-    internal static string GetColorTone(RgbColor rgb)
+    public static string GetColorTone(RgbColor rgb)
     {
         nint p = GetTone(rgb);
         try
@@ -163,9 +185,9 @@ internal static class ColorApi
         }
     }
 
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     private static extern nint GetTemperature(RgbColor rgb);
-    internal static string GetColorTemp(RgbColor rgb)
+    public static string GetColorTemp(RgbColor rgb)
     {
         nint p = GetTemperature(rgb);
         try
@@ -215,7 +237,7 @@ internal static class ColorApi
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern LinearColor RgbToLinear(RgbColor rgb);
-    
+
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern RgbColor LinearToRgb(LinearColor linear);
 
@@ -235,9 +257,9 @@ internal static class ColorApi
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern RgbColor CmykToRgb(CmykSpace rgb);
 
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     private static extern nint GetCmykMod(CmykSpace cmyk);
-    internal static string GetCmykModifier(CmykSpace cmyk)
+    public static string GetCmykModifier(CmykSpace cmyk)
     {
         nint p = GetCmykMod(cmyk);
         try
@@ -262,9 +284,9 @@ internal static class ColorApi
     // --- Hex String Conversion (The special one!) ---
 
     //[return: MarshalAs(UnmanagedType.LPStr)]
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     private static extern nint RgbToRgbHex(RgbColor rgb, [MarshalAs(UnmanagedType.I1)] bool includeAlpha);
-    internal static string GetRgbHex(RgbColor rgb, bool includeAlpha)
+    public static string GetRgbHex(RgbColor rgb, bool includeAlpha)
     {
         nint p = 0;
         try
@@ -297,9 +319,9 @@ internal static class ColorApi
 
     // --- Get Console Colors by represented string ---
 
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     private static extern nint GetFgColor(RgbColor fg);
-    internal static string FGAscii(RgbColor fg)
+    public static string FGAscii(RgbColor fg)
     {
         nint p = GetFgColor(fg);
         try
@@ -312,10 +334,10 @@ internal static class ColorApi
             FreeAllocPtr(p);
         }
     }
-    
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     private static extern nint GetBgColor(RgbColor bg);
-    internal static string BGAscii(RgbColor bg)
+    public static string BGAscii(RgbColor bg)
     {
         nint p = GetBgColor(bg);
         try
@@ -341,21 +363,6 @@ internal static class ColorApi
     public static extern void ClearBuffer();
 
     // --- Get Specific Property Methods ---
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern double GetHue(RgbColor rgb);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern double GetHsvSaturation(RgbColor rgb);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern double GetHslSaturation(RgbColor rgb);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern double GetHslLightness(RgbColor rgb);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern double GetHsvBrightness(RgbColor rgb);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern double GetRelativeLuminance(RgbColor rgb);
@@ -390,6 +397,14 @@ internal static class ColorApi
     public static RgbColor[] GetTetradicColors(RgbColor rgb)
     {
         TetradicResults results = GetTetradic(rgb);
+        return results.GetColors();
+    }
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    private static extern SplitComplementaryResults GetSplitComplementary(RgbColor rgb);
+    public static RgbColor[] GetComplementaryColors(RgbColor rgb)
+    {
+        SplitComplementaryResults results = GetSplitComplementary(rgb);
         return results.GetColors();
     }
 

@@ -96,37 +96,3 @@ COLORS_DEV_API LabSpace XyzToLab(XyzSpace xyz)
     return XyzToLab_White(xyz, WP_D65_FULL);     // WP_D65_FULL - default, WP_D65 is the other options
 }
 
-COLORS_DEV_API colors_dev_float64 GetRelativeLuminance(RgbColor rgb)
-{
-    return RgbToXyz(rgb).y;
-}
-
-COLORS_DEV_API colors_dev_float64 GetPerceptualBrightness(RgbColor rgb) {
-    return RgbToLab(rgb).l;
-}
-
-COLORS_DEV_API colors_dev_float64 GetContrastRatio(RgbColor a, RgbColor b)
-{
-    // Ensure these are normalized to 0.0 - 1.0
-    colors_dev_float64 la = GetRelativeLuminance(a);
-    colors_dev_float64 lb = GetRelativeLuminance(b);
-
-    // If your library returns 0-100, normalize here:
-    if (la > 1.0 || lb > 1.0) {
-        la /= 100.0;
-        lb /= 100.0;
-    }
-
-    colors_dev_float64 l1 = (la > lb) ? la : lb;
-    colors_dev_float64 l2 = (la > lb) ? lb : la;
-
-    return (l1 + 0.05) / (l2 + 0.05);
-}
-
-COLORS_DEV_API colors_dev_color32 GetBestContrastColor(RgbColor bgColor)
-{
-    RgbColor white = { 255, 255, 255, 255 };
-    RgbColor black = { 255, 0, 0, 0 };
-
-    return (GetContrastRatio(bgColor, white) >= GetContrastRatio(bgColor, black));
-}

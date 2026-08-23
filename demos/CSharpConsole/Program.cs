@@ -1,5 +1,5 @@
 ﻿using Chizl.ConsoleSupport;
-using System.Diagnostics;
+using System.Drawing;
 using System.Text;
 using static ColorApi;
 
@@ -7,18 +7,22 @@ namespace CSharpConsole
 {
     internal class Program
     {
+        const string resetAscii = "\x1b[0m";
         const string welcomeToDemo = " Welcome to the .NET Console Color Demo! ";
         // column min width, this is adding the column number at the start of each line with padding.
         const int _columnMinWidth = 64;
 
         // some stress test colors, and some common ones.
-        static readonly RgbColor rgbNearPureBlack = new RgbColor { alpha = 255, red = 1, green = 3, blue = 2 };
-        static readonly RgbColor rgbNearPureWhite = new RgbColor { alpha = 255, red = 254, green = 252, blue = 253 };
+        static readonly RgbColor rgbStressBlack = new RgbColor { alpha = 255, red = 1, green = 3, blue = 2 };
+        static readonly RgbColor rgbStressWhite = new RgbColor { alpha = 255, red = 254, green = 252, blue = 253 };
+        static readonly RgbColor rgbNearPureBlack = new RgbColor { alpha = 255, red = 1, green = 2, blue = 2 };
+        static readonly RgbColor rgbNearPureWhite = new RgbColor { alpha = 255, red = 252, green = 253, blue = 253 };
         static readonly RgbColor rgbVividMagenta = new RgbColor { alpha = 255, red = 255, green = 0, blue = 255 };
         static readonly RgbColor rgbSmokyTaupe = new RgbColor { alpha = 255, red = 127, green = 129, blue = 128 };
         static readonly RgbColor rgbDeepNavy = new RgbColor { alpha = 255, red = 18, green = 52, blue = 86 };
         static readonly RgbColor rgbOrange = new RgbColor { alpha = 255, red = 255, green = 128, blue = 0};
         static readonly RgbColor rgbFROB = new RgbColor { alpha = 255, red = 29, green = 0, blue = 0 };
+        static readonly RgbColor rgbPaleTintYellow = new RgbColor { alpha = 255, red = 250, green = 250, blue = 191 };
 
         static readonly RgbColor rgbEmpty = new RgbColor { alpha = 0, red = 0, green = 0, blue = 0 };
         static readonly RgbColor rgbRed = new RgbColor { alpha = 255, red = 255, green = 0, blue = 0 };
@@ -31,18 +35,26 @@ namespace CSharpConsole
         static readonly RgbColor rgbWhite = new RgbColor { alpha = 255, red = 255, green = 255, blue = 255 };
         static readonly RgbColor rgbConsoleBlack = new RgbColor { alpha = 255, red = 12, green = 12, blue = 12 };
 
+        //static readonly double[] _hslHueLookup = new double[] { 208.0, 211.0, 212.0, 215.0, 224.0, 226.0, 227.0, 228.0, 
+        //                                                        229.0, 230.0, 231.0, 232.0, 233.0, 234.0, 235.0, 236.0, 
+        //                                                        237.0, 238.0, 239.0 };
+        //static readonly HslSpace hslFind1 = new HslSpace { hue = 208, saturation = 100, lightness = 100 };
+
         static readonly (RgbColor bgColor, RgbColor fgColor, string title)[] _listOfColors = {
+           (rgbStressBlack, rgbWhite, "Stress Black"),
+           (rgbStressWhite, rgbBlack, "Stress White"),
+           (rgbNearPureBlack, rgbWhite, "Near Pure Black"),
+           (rgbNearPureWhite, rgbBlack, "Near Pure White"),
            (rgbOrange, rgbBlack, "Pure Orange"),
            (rgbBlue, rgbWhite, "Pure Blue"),
            (rgbViolet, rgbWhite, "Violet"),
            (rgbCyan, rgbBlack, "Cyan"),
            (rgbAshRose, rgbWhite, "Ash Rose"),
-           (rgbNearPureBlack, rgbWhite, "Near Pure Black"),
            (rgbDeepNavy, rgbWhite, "Deep Navy"),
-           (rgbNearPureWhite, rgbBlack, "Near Pure White"),
-           (rgbFROB, rgbWhite, "Fiery Red Orange Blackened"),
+           (rgbFROB, rgbWhite, "Charcoal Red"),
            (rgbVividMagenta, rgbBlack, "Vivid Magenta"),
-           (rgbSmokyTaupe, rgbBlack, "Smoky Taupe")
+           (rgbSmokyTaupe, rgbBlack, "Smoky Taupe"),
+           (rgbPaleTintYellow, rgbBlack, "Pale Tint Yellow"),
         };
 
         static void Main(string[] args)
@@ -76,6 +88,22 @@ namespace CSharpConsole
         {
             ClearBuffer();
 
+            // TESTING HUES
+            //foreach(var hue in _hslHueLookup)
+            //{
+            //    var rgb = HslToRgb(new HslSpace() { hue = hue, saturation = 75.0, lightness = 50.0, raw_lightness=0.5 });
+            //    {
+            //        var textColor = rgbWhite;
+            //        double ratio = GetContrastRatio(rgb, textColor);
+            //        if (ratio < 4.5)
+            //            textColor = rgbBlack;
+            //        ShowColorInfo(rgb, textColor, $"Hue: {hue}");
+            //    }
+            //}
+            //ResetColor();
+            //AnyKey("Press any keey to continue...", rgbAshRose);
+            //ClearBuffer();
+
             //(int row, int col) setRowCol = (0, 0);
             //(int row, int col) lastRowCol = (0, 0);
 
@@ -101,11 +129,22 @@ namespace CSharpConsole
         static void ShowColorInfo(RgbColor clr, RgbColor textClr, string title)
         {
             var pad = " ";
+            string sat = string.Empty;
             var sb = new StringBuilder();
-            //var colorName = WeightedCreatorEngine.GenerateDynamicName(clr);
+
+            var yellowFG = FGAscii(new RgbColor() { alpha = 255, red = 255, green = 255, blue = 0 });
+            var yellowBG = BGAscii(new RgbColor() { alpha = 255, red = 255, green = 255, blue = 0 });
 
             var hsv = RgbToHsv(clr);
             var hsl = RgbToHsl(clr);
+
+            var monoRgbColors = new RgbColor[5];
+            monoRgbColors[0] = GetMonochromaticVariant(clr, 0.4);   // Lighter Tint
+            monoRgbColors[1] = GetMonochromaticVariant(clr, 0.2);   // Light Tint
+            monoRgbColors[2] = clr;                                 // Base Color
+            monoRgbColors[3] = GetMonochromaticVariant(clr, -0.2);  // Dark Shade
+            monoRgbColors[4] = GetMonochromaticVariant(clr, -0.4);  // Darker Shade
+
             var xyz = RgbToXyz(clr);
             var cmyk = RgbToCmyk(clr);
 
@@ -140,43 +179,66 @@ namespace CSharpConsole
             var analogous = GetAnalogousColors(clr);
             var colNum = 1;
 
+            var bgTxtColor = string.Empty;
+            var bgTxtResetColor = string.Empty;
+            var altColorLen = 0;
+            if (suggestTextClr == Color.Black)
+            {
+                bgTxtColor = yellowBG;
+                bgTxtResetColor = BGAscii(clr);
+            }
+            else
+            {
+                bgTxtColor = yellowFG;
+                bgTxtResetColor = FGAscii(new RgbColor() { alpha = 255, red = suggestTextClr.R, green = suggestTextClr.G, blue = suggestTextClr.B });
+            }
+
             sb.AppendLine($" {colNum++:00}:{pad} --- Testing {title} - {hex} ---"); // c({col}), r({row})
             sb.AppendLine($" {colNum++:00}:{pad}'{title}' Color: (R:{clr.red}, G:{clr.green}, B:{clr.blue})");
-            sb.AppendLine($" {colNum++:00}:{pad} - HSV: H:{hsv.hue:0.00}, S:{hsv.saturation:0.00}, V:{hsv.value:0.00}, Raw:{hsv.raw_value:0.000000}");
-            sb.AppendLine($" {colNum++:00}:{pad} - HSL: H:{hsl.hue:0.00}, S:{hsl.saturation:0.00}, L:{hsl.lightness:0.00}, Raw:{hsl.raw_lightness:0.000000}");
-            sb.AppendLine($" {colNum++:00}:{pad} - CMYK: C:{cmyk.cyan:0.00}, M:{cmyk.magenta:0.00}, Y:{cmyk.yellow:0.00}, K:{cmyk.key:0.00}, Raw:{cmyk.raw_key:0.000000}");
+            sb.AppendLine($" {colNum++:00}:{pad} - HSV:         : H:{hsv.hue:0.00}, S:{hsv.saturation:0.00}, V:{hsv.value:0.00}, Raw:{hsv.raw_value:0.000000}");
+            sb.AppendLine($" {colNum++:00}:{pad} - HSL          : H:{hsl.hue:0.00}, S:{hsl.saturation:0.00}, L:{hsl.lightness:0.00}, Raw:{hsl.raw_lightness:0.000000}");
+            if (hsl.saturationNormalized != hsl.saturation)
+            {
+                sb.AppendLine($" {colNum++:00}:{bgTxtColor}{pad} - Normalized   : H:{hsl.hue:0.00}, S:{hsl.saturationNormalized:0.00}, L:{hsl.lightness:0.00}, Raw:{hsl.raw_lightness:0.000000}");
+                altColorLen = bgTxtColor.Length;
+            }
+            sb.AppendLine($" {colNum++:00}:{pad} - CMYK         : C:{cmyk.cyan:0.00}, M:{cmyk.magenta:0.00}, Y:{cmyk.yellow:0.00}, K:{cmyk.key:0.00}, Raw:{cmyk.raw_key:0.000000}");
             sb.AppendLine($" {colNum++:00}:{pad} - CMYK Modifier: {cmykModifier}");
-            sb.AppendLine($" {colNum++:00}:{pad} - XYZ: X:{xyz.x:0.00}, Y:{xyz.y:0.00}, Z:{xyz.z:0.00}");
-            sb.AppendLine($" {colNum++:00}:{pad} - LAB_D64: L:{lab64.l:0.0000}, A:{lab64.a:0.0000}, B:{lab64.b:0.0000}");
-            sb.AppendLine($" {colNum++:00}:{pad} - LABFull: L:{labFull.l:0.0000}, A:{labFull.a:0.0000}, B:{labFull.b:0.0000}");
-            sb.AppendLine($" {colNum++:00}:{pad} - LUV_D64: L:{luv64.l:0.0000}, U:{luv64.u:0.0000}, V:{luv64.v:0.0000}");
-            sb.AppendLine($" {colNum++:00}:{pad} - LUVFull: L:{luvFull.l:0.0000}, U:{luvFull.u:0.0000}, V:{luvFull.v:0.0000}");
-            sb.AppendLine($" {colNum++:00}:{pad} - LCH_D64: L:{lch64.l:0.0000}, U:{lch64.c:0.0000}, V:{lch64.h:0.0000}");
-            sb.AppendLine($" {colNum++:00}:{pad} - LCHFull: L:{lchFull.l:0.0000}, U:{lchFull.c:0.0000}, V:{lchFull.h:0.0000}");
+            sb.AppendLine($" {colNum++:00}:{pad} - XYZ          : X:{xyz.x:0.00}, Y:{xyz.y:0.00}, Z:{xyz.z:0.00}");
+            sb.AppendLine($" {colNum++:00}:{pad} - LAB_D64      : L:{lab64.l:0.0000}, A:{lab64.a:0.0000}, B:{lab64.b:0.0000}");
+            sb.AppendLine($" {colNum++:00}:{pad} - LABFull      : L:{labFull.l:0.0000}, A:{labFull.a:0.0000}, B:{labFull.b:0.0000}");
+            sb.AppendLine($" {colNum++:00}:{pad} - LUV_D64      : L:{luv64.l:0.0000}, U:{luv64.u:0.0000}, V:{luv64.v:0.0000}");
+            sb.AppendLine($" {colNum++:00}:{pad} - LUVFull      : L:{luvFull.l:0.0000}, U:{luvFull.u:0.0000}, V:{luvFull.v:0.0000}");
+            sb.AppendLine($" {colNum++:00}:{pad} - LCH_D64      : L:{lch64.l:0.0000}, U:{lch64.c:0.0000}, V:{lch64.h:0.0000}");
+            sb.AppendLine($" {colNum++:00}:{pad} - LCHFull      : L:{lchFull.l:0.0000}, U:{lchFull.c:0.0000}, V:{lchFull.h:0.0000}");
             sb.AppendLine($" {colNum++:00}:{pad} - Complementary Color: (R:{cc.red}, G:{cc.green}, B:{cc.blue})");
             sb.AppendLine($" {colNum++:00}:{pad} - ContrastRatio: {ratio:0.00} - {((ratio < 4.5)?"Alert":"Good")}");
-            sb.AppendLine($" {colNum++:00}:{pad} - Suggested Text Color: {suggestTextClr}");
-            sb.AppendLine($" {colNum++:00}:{pad} - Tone: {colorTone}");
-            sb.AppendLine($" {colNum++:00}:{pad} - Temperature: {colorTemp}"); 
+            sb.AppendLine($" {colNum++:00}:{pad} - Suggested Text Color: {suggestTextClr.Name}");
+            sb.AppendLine($" {colNum++:00}:{pad} - Tone         : {colorTone}");
+            sb.AppendLine($" {colNum++:00}:{pad} - Temperature: : {colorTemp}"); 
             
-            sb.AppendLine($" {colNum++:00}:{pad} - HEX8: {ahex}, Dec: {aDec}");
-            sb.AppendLine($" {colNum++:00}:{pad} - HEX6: {hex},   Dec: {dec}");
+            sb.AppendLine($" {colNum++:00}:{pad} - HEX8         : {ahex}, Dec: {aDec}");
+            sb.AppendLine($" {colNum++:00}:{pad} - HEX6         : {hex},   Dec: {dec}");
 
             sb.AppendLine($" {colNum++:00}:{pad} - HSV Roundtrip -> RGB: (R:{hsv_rev.red}, G:{hsv_rev.green}, B:{hsv_rev.blue})");
             sb.AppendLine($" {colNum++:00}:{pad} - HSL Roundtrip -> RGB: (R:{hsl_rev.red}, G:{hsl_rev.green}, B:{hsl_rev.blue})");
             sb.AppendLine($" {colNum++:00}:{pad} - CMYK Roundtrip -> RGB: (R:{cmyk_rev.red}, G:{cmyk_rev.green}, B:{cmyk_rev.blue})");
 
-            CreateString($" {colNum++:00}:{pad} - Analogous: (R:{clr.red}, G:{clr.green}, B:{clr.blue})", analogous, ref sb);
+            CreateString($" {colNum++:00}:{pad} - Analogous    : (R:{clr.red}, G:{clr.green}, B:{clr.blue})", analogous, ref sb);
             colNum += analogous.Length;
-            CreateString($" {colNum++:00}:{pad} - Triadic: (R:{clr.red}, G:{clr.green}, B:{clr.blue})", triad, ref sb);
+            CreateString($" {colNum++:00}:{pad} - Triadic      : (R:{clr.red}, G:{clr.green}, B:{clr.blue})", triad, ref sb);
             colNum += triad.Length;
-            CreateString($" {colNum++:00}:{pad} - Tetradic: (R:{clr.red}, G:{clr.green}, B:{clr.blue})", tetrad, ref sb);
+            CreateString($" {colNum++:00}:{pad} - Tetradic     : (R:{clr.red}, G:{clr.green}, B:{clr.blue})", tetrad, ref sb);
             colNum += tetrad.Length;
+            // this is to keep all color boxes the same height since SaturactionNormalized has an extra space.
+            if (hsl.saturationNormalized == hsl.saturation)
+                sb.AppendLine($"");
 
             var allLines = sb.ToString().Replace("\r", "").Split('\n');
-            var width = GetWidth(allLines, _columnMinWidth, 1);
-
-            WriteLines(clr, textClr, sb.ToString().Replace("\r", "").Split('\n'), width);
+            //var width = GetWidth(allLines, _columnMinWidth, 1);
+            //WriteLines(clr, textClr, sb.ToString().Replace("\r", "").Split('\n'), width - altColorLen, altColorLen);
+            var width = 80;
+            WriteLines(clr, textClr, sb.ToString().Replace("\r", "").Split('\n'), width, 0);
         }
 
         static void CreateString(string baseStr, RgbColor[] colors, ref StringBuilder sb)
@@ -226,19 +288,30 @@ namespace CSharpConsole
         static void WriteLine(RgbColor bg, RgbColor fg, string msg, params object[] args)
             => PrintWithColor(bg, fg, string.Format($"{msg}\n", args));
 
-        static int WriteLines(RgbColor bg, RgbColor fg, string[] msgs, int minWidth = 0)
+        static int WriteLines(RgbColor bg, RgbColor fg, string[] msgs, int minWidth = 0, int altColorLen = 0)
         {
             var maxLen = 0;
             foreach (var msg in msgs)
                 maxLen = Math.Max(maxLen, msg.Length);
 
+            if (altColorLen > 0)
+                maxLen -= (int)Math.Ceiling(altColorLen * 0.5);
+
             maxLen++;   // add space to end            
             if (maxLen < minWidth)
                 maxLen = minWidth;
 
-            foreach (var msg in msgs)
+            foreach (string msg in msgs)
             {
-                var newMsg = msg + new string(' ', maxLen - msg.Length);
+                var start = msg.IndexOf("\u001b[");
+                var len = start;
+                if (start > 0)
+                    len = (msg.IndexOf("m", start) - start) + 2;
+                
+                if (len < 0) len = 0;
+
+                var newMsg = msg + new string(' ', maxLen - (msg.Length - len));
+
                 PrintWithColor(bg, fg, newMsg);
                 if (msgs.Length > 1)
                     Console.WriteLine();

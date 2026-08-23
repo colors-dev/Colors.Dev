@@ -13,8 +13,11 @@ extern "C" {
 #include "import_exports.h"
 #include "color_types.h"
 
+// Tune this to change how close to white it triggers
+static const double COLOR_EPSILON = 0.005f;
+
 /// <summary>
-/// Converts an RGB color to its HSL (Hue, Saturation, Lightness) equivalent.
+/// Converts an RGB color to its HSL (Hue, Saturation, SaturationNormalized, Lightness, Raw_Lightness) equivalent.
 /// </summary>
 /// <param name="rgb">RGB Color</param>
 /// <returns>HSL struct</returns>
@@ -29,18 +32,28 @@ COLORS_DEV_API HslSpace RgbToHsl(RgbColor rgb);
 COLORS_DEV_API RgbColor HslToRgb(HslSpace hsl);
 
 /// <summary>
-/// Gets the lightness component from an RGB color converted to HSL color space.
+/// Generates a monochromatic variant (a tint or shade) of the provided base color.
+/// <code>
+/// // Example of how a consumer would use it to build a standard 5-swatch UI palette
+/// void GenerateUiPalette(RgbColor baseColor, RgbColor* outBuffer)
+/// {
+///     outBuffer[0] = GetMonochromaticVariant(baseColor, 0.4);   // Lighter Tint
+///     outBuffer[1] = GetMonochromaticVariant(baseColor, 0.2);   // Light Tint
+///     outBuffer[2] = baseColor;                                 // Base Color
+///     outBuffer[3] = GetMonochromaticVariant(baseColor, -0.2);  // Dark Shade
+///     outBuffer[4] = GetMonochromaticVariant(baseColor, -0.4);  // Darker Shade
+/// }
+/// </code>
 /// </summary>
-/// <param name="rgb">The RGB color to convert.</param>
-/// <returns>The lightness value in the HSL representation, typically in the range [0.0, 1.0].</returns>
-COLORS_DEV_API colors_dev_float64 GetHslLightness(RgbColor rgb);
-
-/// <summary>
-/// Gets the saturation component from an RGB color converted to HSL color space.
-/// </summary>
-/// <param name="rgb">The RGB color to convert.</param>
-/// <returns>The saturation component in HSL color space as a 64-bit floating point value.</returns>
-COLORS_DEV_API colors_dev_float64 GetHslSaturation(RgbColor rgb);
+/// <param name="rgb">The base RGB color to modify.</param>
+/// <param name="lightnessShift">
+/// A relative delta to apply to the color's lightness, ranging from -1.0 to 1.0. 
+/// Positive values create lighter Tints (e.g., 0.15 makes the color 15% lighter).
+/// Negative values create darker Shades (e.g., -0.20 makes the color 20% darker).
+/// The resulting lightness is safely clamped between 0.0 (pure black) and 1.0 (pure white).
+/// </param>
+/// <returns>A new RgbColor shifted by the specified lightness amount.</returns>
+COLORS_DEV_API RgbColor GetMonochromaticVariant(RgbColor rgb, double lightnessShift);
 
 // --- End of "extern C" block ---
 #ifdef __cplusplus

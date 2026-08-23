@@ -1,5 +1,5 @@
 // ansi_printing.c
-#include <string.h>             // For strlen, strcpy_s
+// #include <string.h>             // For strlen, strcpy_s
 #include <stdio.h>              // Required for sprintf
 #include "ansi_printing.h"
 #include "common.h"
@@ -56,7 +56,6 @@ COLORS_DEV_API char* GetBgColor(RgbColor bg)
     sprintf_s(code, sizeof(code), "\x1b[%d;2;%u;%u;%um", 48, bg.red, bg.green, bg.blue);
     return createBuffer(code);
 }
-
 
 COLORS_DEV_API void ResetColor(void) 
 { 
