@@ -148,29 +148,29 @@ COLORS_DEV_API char* GetTemperature(RgbColor rgb)
     while (h < 0) h += 360.0;
     while (h >= 360.0) h -= 360.0;
 
-    // Red / Red-Magenta
+    // Rose / Red
     if (h >= 315.0 || h < 15.0) return createBuffer(isMuted ? "Muted Hot" : "Hot");
 
     // Warm: Orange/Yellow
     if (h < 75.0) return createBuffer(isMuted ? "Muted Warm" : "Warm");
 
     // Neutral-Warm: Yellow-Green
-    if (h < 105.0) return isMuted ? createBuffer("Muted Neutral-Warm") : createBuffer("Neutral-Warm");
+    if (h < 105.0) return createBuffer(isMuted ? "Muted Neutral-Warm" : "Neutral-Warm");
 
     // Neutral: Green
-    if (h < 135.0) return isMuted ? createBuffer("Muted Neutral") : createBuffer("Neutral");
+    if (h < 135.0) return createBuffer(isMuted ? "Muted Neutral" : "Neutral");
 
     // Neutral-Cool: Cyan-Green
-    if (h < 165.0) return isMuted ? createBuffer("Muted Neutral-Cool") : createBuffer("Neutral-Cool");
+    if (h < 165.0) return createBuffer(isMuted ? "Muted Neutral-Cool" : "Neutral-Cool");
 
     // Cool: Cyan/Blue-Cyan
-    if (h < 225.0) return isMuted ? createBuffer("Muted Cool") : createBuffer("Cool");
+    if (h < 225.0) return createBuffer(isMuted ? "Muted Cool" : "Cool");
 
     // Cold: Blue/Violet
-    if (h < 285.0) return isMuted ? createBuffer("Muted Cold") : createBuffer("Cold");
+    if (h < 285.0) return createBuffer(isMuted ? "Muted Cold" : "Cold");
 
-    // Cool-Hot transition: Violet/Magenta
-    return createBuffer(isMuted ? "Muted Cool-Hot" : "Neutral-Cool-Hot");
+    // Cool-Hot transition: Magenta
+    return createBuffer(isMuted ? "Muted Mediating" : "Mediating"); // 285 - 314
 }
 
 COLORS_DEV_API RgbColor GetComplementary(RgbColor rgb)

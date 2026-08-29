@@ -255,6 +255,11 @@ namespace CSharpConsole
             Write(rgbEmpty, rgbEmpty, new string(' ', num_spaces));
             WriteLine(rgbRed, rgbYellow, welcomeToDemo);
 
+            // rgb: 175, 128, 80
+            var rgb2cmyk = ColorApi.RgbToCmyk(new RgbColor() { red = 175, green = 128, blue = 80 });
+            var cmyk = new CmykSpace() { cyan = 0.00, magenta = 26.86, yellow = 54.29, key = 31.37 };
+            var rgb = ColorApi.CmykToRgb(cmyk);
+
             // Set no color.
             WriteLine(rgbEmpty, rgbEmpty, " - showing default color - ");
             // foreground color only.
