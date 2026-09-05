@@ -10,9 +10,9 @@
 // numbers manageable.
 #define COLORS_DEV_FULL_YEAR 2026
 #define COLORS_DEV_YEAR_OFFSET 6
-#define COLORS_DEV_MONTH 8
-#define COLORS_DEV_DAY 29
-#define COLORS_DEV_UTC_TIME 0515
+#define COLORS_DEV_MONTH 9
+#define COLORS_DEV_DAY 5
+#define COLORS_DEV_UTC_TIME 1408
 // This release number is incremented manually for each NuGet 
 // release, to distinguish between multiple releases on the 
 // same day and must be manually updated.

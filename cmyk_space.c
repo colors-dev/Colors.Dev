@@ -4,6 +4,7 @@
 #include "common.h"             // For clampInt, clampDbl
 #include <math.h>               // For fmin, fmax, fabs, round, pow
 #include <stdbool.h>            // bool
+// #include <string.h>             // strlen
 
 COLORS_DEV_API CmykSpace RgbToCmyk(RgbColor rgb)
 {
@@ -65,8 +66,19 @@ COLORS_DEV_API RgbColor CmykToRgb(CmykSpace cmyk)
 
 COLORS_DEV_API char* GetCmykMod(CmykSpace cmyk)
 {
+    // Convert CMYK to RGB
+    RgbColor rgb = CmykToRgb(cmyk);
+    bool isBlack = rgb.red == 0 && rgb.green == 0 && rgb.blue == 0;
+    bool isWhite = rgb.red == 255 && rgb.green == 255 && rgb.blue == 255;
+
+    if (isBlack)
+        return createBuffer("Black");
+    else if (isWhite)
+        return createBuffer("White");
+
     char keyTone[32] = { 0 };
     char modifier[32] = { 0 };
+    char primeCombo[32] = { 0 };
 
     double c = cmyk.cyan;
     double m = cmyk.magenta;
@@ -78,6 +90,14 @@ COLORS_DEV_API char* GetCmykMod(CmykSpace cmyk)
     cmykVals[1] = m;
     cmykVals[2] = y;
     cmykVals[3] = k;
+
+    unsigned char maxRgb = (unsigned char)fmax((int)rgb.red, fmax((int)rgb.green, (int)rgb.blue));
+    bool isYellowDominant = rgb.red == maxRgb && rgb.green == maxRgb && rgb.blue != maxRgb;
+	bool isCyanDominant = rgb.green == maxRgb && rgb.blue == maxRgb && rgb.red != maxRgb;
+    bool isMagentaDominant = rgb.red == maxRgb && rgb.blue == maxRgb && rgb.green != maxRgb;
+    bool isRedDominant = rgb.red == maxRgb && rgb.green != maxRgb && rgb.blue != maxRgb;
+    bool isGreenDominant = rgb.green == maxRgb && rgb.red != maxRgb && rgb.blue != maxRgb;
+    bool isBlueDominant = rgb.blue == maxRgb && rgb.red != maxRgb && rgb.green != maxRgb;
 
     double maxCmy = fmax(c, fmax(m, y));    // aka PigmentLevel
     double minCmy = fmin(c, fmin(m, y));
@@ -95,11 +115,40 @@ COLORS_DEV_API char* GetCmykMod(CmykSpace cmyk)
     bool hasStrongDominance = cmySpread >= 35.0;
     bool warmPigment = c < 35.0 && m > 50.0 && y > 55.0;
     bool isNearNeutral = cmySpread < 15.0 || (k >= 30.0 && maxCmy < 35.0 && cmySpread < 25.0);
+    bool isPaperWhite = (c < 5.0 && m < 5.0 && y < 5.0 && k < 5.0);
+    bool isDeepBlack = (k > 95.0);
 
-    // PAPER WHITE (Top priority)
-    if (c < 5.0 && m < 5.0 && y < 5.0 && k < 5.0) return createBuffer("Paper White");
-    // BLACKED OUT (Top priority)
-    if (k > 95.0) return createBuffer("Deep Inky Black");
+    if (isPaperWhite || isDeepBlack) {
+        if (isMagentaDominant) 
+            sprintf_s(primeCombo, sizeof(primeCombo), "Magenta Tinted");
+        else if (isYellowDominant) 
+            sprintf_s(primeCombo, sizeof(primeCombo), "Yellow Tinted");
+        else if (isCyanDominant) 
+            sprintf_s(primeCombo, sizeof(primeCombo), "Cyan Tinted");
+        else if (isRedDominant) 
+            sprintf_s(primeCombo, sizeof(primeCombo), "Red Tinted");
+        else if (isGreenDominant) 
+            sprintf_s(primeCombo, sizeof(primeCombo), "Green Tinted");
+        else if (isBlueDominant) 
+            sprintf_s(primeCombo, sizeof(primeCombo), "Blue Tinted");
+
+        // PAPER WHITE (Top priority)
+        if (isPaperWhite)
+        {
+            if (primeCombo[0] == 0)
+                return createBuffer("Paper White");
+            else
+                return combineBuffers(primeCombo, "Paper White");
+        }
+        // BLACKED OUT (Top priority)
+        else if (isDeepBlack)
+        {
+            if (primeCombo[0] == 0)
+                return createBuffer("Deep Inky Black");
+            else
+                return combineBuffers(primeCombo, "Deep Black");
+        }
+    }
     
     // COLOR KEY TONES, designed to be slightly different than HSV->GetTone().
     if (k < 8.0)
@@ -114,8 +163,6 @@ COLORS_DEV_API char* GetCmykMod(CmykSpace cmyk)
     else if (k < 73.0) sprintf_s(keyTone, sizeof(keyTone), (hasStrongDominance ? "Darkened" : "Smoked"));
     else if (k <= 95.0) sprintf_s(keyTone, sizeof(keyTone), "Charcoal");
 
-    // Convert CMYK to RGB
-    RgbColor rgb = CmykToRgb(cmyk);
     // Convert RGB to HSL
     HslSpace hsl = RgbToHsl(rgb);
 
@@ -127,25 +174,25 @@ COLORS_DEV_API char* GetCmykMod(CmykSpace cmyk)
     if (h >= 352.5 || h < 7.5)          sprintf_s(modifier, sizeof(modifier), "Red");                // 01) 0°   - Primary
     else if (h >= 7.5 && h < 22.5)      sprintf_s(modifier, sizeof(modifier), "Red-Orange");         // 02) 15°  - Intermediate
     else if (h >= 22.5 && h < 37.5)     sprintf_s(modifier, sizeof(modifier), "Orange");             // 03) 30°  - Tertiary
-    else if (h >= 37.5 && h < 52.5)     sprintf_s(modifier, sizeof(modifier), "Amber");              // 04) 45°  - Standard
+    else if (h >= 37.5 && h < 52.5)     sprintf_s(modifier, sizeof(modifier), "Amber");              // 04) 45°  - Intermediate
     else if (h >= 52.5 && h < 67.5)     sprintf_s(modifier, sizeof(modifier), "Yellow");             // 05) 60°  - Secondary
     else if (h >= 67.5 && h < 82.5)     sprintf_s(modifier, sizeof(modifier), "Yellow-Green");       // 06) 75°  - Intermediate
     else if (h >= 82.5 && h < 97.5)     sprintf_s(modifier, sizeof(modifier), "Chartreuse");         // 07) 90°  - Tertiary
-    else if (h >= 97.5 && h < 112.5)    sprintf_s(modifier, sizeof(modifier), "Lime Green");         // 08) 105° - Standard
+    else if (h >= 97.5 && h < 112.5)    sprintf_s(modifier, sizeof(modifier), "Lime Green");         // 08) 105° - Intermediate
     else if (h >= 112.5 && h < 127.5)   sprintf_s(modifier, sizeof(modifier), "Green");              // 09) 120° - Primary
     else if (h >= 127.5 && h < 142.5)   sprintf_s(modifier, sizeof(modifier), "Spring Green");       // 10) 135° - Intermediate
     else if (h >= 142.5 && h < 157.5)   sprintf_s(modifier, sizeof(modifier), "Mint Green");         // 11) 150° - Tertiary
     else if (h >= 157.5 && h < 172.5)   sprintf_s(modifier, sizeof(modifier), "Blue-Green");         // 12) 165° - Intermediate
     else if (h >= 172.5 && h < 187.5)   sprintf_s(modifier, sizeof(modifier), "Cyan");               // 13) 180° - Secondary
-    else if (h >= 187.5 && h < 202.5)   sprintf_s(modifier, sizeof(modifier), "Sky Blue");           // 14) 195° - Standard
+    else if (h >= 187.5 && h < 202.5)   sprintf_s(modifier, sizeof(modifier), "Sky Blue");           // 14) 195° - Intermediate
     else if (h >= 202.5 && h < 217.5)   sprintf_s(modifier, sizeof(modifier), "Azure");              // 15) 210° - Tertiary
-    else if (h >= 217.5 && h < 232.5)   sprintf_s(modifier, sizeof(modifier), "Cobalt Blue");        // 16) 225° - Standard
+    else if (h >= 217.5 && h < 232.5)   sprintf_s(modifier, sizeof(modifier), "Cobalt Blue");        // 16) 225° - Intermediate
     else if (h >= 232.5 && h < 247.5)   sprintf_s(modifier, sizeof(modifier), "Blue");               // 17) 240° - Primary
     else if (h >= 247.5 && h < 262.5)   sprintf_s(modifier, sizeof(modifier), "Blue-Violet");        // 18) 255° - Intermediate
     else if (h >= 262.5 && h < 277.5)   sprintf_s(modifier, sizeof(modifier), "Violet");             // 19) 270° - Tertiary
-    else if (h >= 277.5 && h < 292.5)   sprintf_s(modifier, sizeof(modifier), "Purple");             // 20) 285° - Standard
+    else if (h >= 277.5 && h < 292.5)   sprintf_s(modifier, sizeof(modifier), "Purple");             // 20) 285° - Intermediate
     else if (h >= 292.5 && h < 307.5)   sprintf_s(modifier, sizeof(modifier), "Magenta");            // 21) 300° - Secondary
-    else if (h >= 307.5 && h < 322.5)   sprintf_s(modifier, sizeof(modifier), "Pink");               // 22) 315° - Standard
+    else if (h >= 307.5 && h < 322.5)   sprintf_s(modifier, sizeof(modifier), "Lyft Pink");          // 22) 315° - Intermediate
     else if (h >= 322.5 && h < 337.5)   sprintf_s(modifier, sizeof(modifier), "Rose");               // 23) 330° - Tertiary
     else                                sprintf_s(modifier, sizeof(modifier), "Crimson");            // 24) 345° - Intermediate (337.5° - 352.5°)
 

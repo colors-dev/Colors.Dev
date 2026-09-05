@@ -1,6 +1,6 @@
 # Colors.Dev
 
-[![Version](https://img.shields.io/badge/version-6.8.29.0514-blue.svg)](https://github.com/colors-dev/Colors.Dev)
+[![Version](https://img.shields.io/badge/version-6.9.5.1408-blue.svg)](https://github.com/colors-dev/Colors.Dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/colors-dev/Colors.Dev/blob/master/LICENSE.md)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-purple.svg)<br/>
 ![Dependencies](https://img.shields.io/badge/dependencies-none-purple)
@@ -560,9 +560,13 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 ---
 
 ## Version History
-- **6.8.29.0514** - Current release
+
+- **6.9.5.1408** - Current release
+  - Tweaked CMYK Modifier, merged and made naming more diverse on the color.
+
+- **6.8.29.0514**
   - **Update**: Tweaked CMYK Modifier, thinking of pulling it out all together.  It does better capture between the Gray and Taupe.  Also tweaked the color name response, using Hue instead of the complex calculations with CMYK to get the same info.
-  
+
 - **6.8.23.0049**
   - **Update**: Updating CMYK Modifier to be more clear with Intensity by use of strong pigment, warm pigment, and dominance.  This allows for better representation for dark and light colors instead of just saying dual red.  It is also more precise for 13 modifier/base color names.
   - Added saturationNormalized property to HslSpace to allow for normalized saturation value for HSL.  This is useful for color analysis and palette generation.
